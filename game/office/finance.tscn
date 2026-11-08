@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://game/office/finance.gd" id="1_script"]
+[node name="Office" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.83, 0.88, 0.77, 1)
+mouse_filter = 2
+[node name="Panel" type="VBoxContainer" parent="."]
+layout_mode = 1
+offset_left = 390.0
+offset_top = 45.0
+offset_right = 1210.0
+offset_bottom = 855.0
+[node name="Title" type="Label" parent="Panel"]
+layout_mode = 2
+text = "장사의신 사옥 · 재무"
+horizontal_alignment = 1
+[node name="Personal" type="Label" parent="Panel"]
+layout_mode = 2
+text = "개인 계좌"
+[node name="Corporate" type="Label" parent="Panel"]
+layout_mode = 2
+text = "법인 계좌"
+[node name="Capital" type="Label" parent="Panel"]
+layout_mode = 2
+text = "출자 원금 · 실현이익"
+[node name="OfficeStatus" type="Label" parent="Panel"]
+layout_mode = 2
+text = "사옥 종류 · 정원"
+[node name="OfficeUpgrade" type="Button" parent="Panel"]
+layout_mode = 2
+text = "사옥 계약 변경"
+[node name="StaffStatus" type="Label" parent="Panel"]
+layout_mode = 2
+text = "직원 현황"
+[node name="Role" type="OptionButton" parent="Panel"]
+layout_mode = 2
+[node name="Hire" type="Button" parent="Panel"]
+layout_mode = 2
+text = "직원 채용"
+[node name="LoanLimit" type="Label" parent="Panel"]
+layout_mode = 2
+text = "대출 한도"
+[node name="TakeLoan" type="Button" parent="Panel"]
+layout_mode = 2
+text = "일반 대출 실행"
+[node name="Loans" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+[node name="Ledger" type="Label" parent="Panel"]
+layout_mode = 2
+text = "최근 원장"
+[node name="Amount" type="SpinBox" parent="Panel"]
+layout_mode = 2
+min_value = 1.0
+max_value = 100000000.0
+value = 10000.0
+[node name="Contribute" type="Button" parent="Panel"]
+layout_mode = 2
+text = "개인 자금 출자"
+[node name="Return" type="Button" parent="Panel"]
+layout_mode = 2
+text = "출자 원금 반환"
+[node name="WithdrawProfit" type="Button" parent="Panel"]
+layout_mode = 2
+text = "실현이익 인출"
+[node name="Message" type="Label" parent="Panel"]
+layout_mode = 2
+text = "법인은 반환 뒤 다음 월 고정비를 남겨야 합니다."
+[node name="Exit" type="Button" parent="Panel"]
+layout_mode = 2
+text = "나가기"

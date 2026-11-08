@@ -1,0 +1,4 @@
+[
+  {"id":"beginner_raiders","name":"초급 약탈단","members":[{"id":"raider_01","name":"약탈단원","max_hp":40,"attack":8,"defense":5,"speed":8}]},
+  {"id":"regular_raiders","name":"일반 약탈단","members":[{"id":"raider_01","name":"약탈단원 1","max_hp":75,"attack":16,"defense":10,"speed":10},{"id":"raider_02","name":"약탈단원 2","max_hp":75,"attack":16,"defense":10,"speed":10}]}
+]

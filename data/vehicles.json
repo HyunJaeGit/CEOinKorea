@@ -1,0 +1,5 @@
+[
+  {"id":"small_truck","name":"소형 화물차","price":1500000,"capacity_g":500000,"speed_multiplier":1.4,"cost_per_km":200},
+  {"id":"medium_truck","name":"중형 화물차","price":5000000,"capacity_g":2000000,"speed_multiplier":1.2,"cost_per_km":400},
+  {"id":"large_truck","name":"대형 화물차","price":15000000,"capacity_g":8000000,"speed_multiplier":1.0,"cost_per_km":800}
+]

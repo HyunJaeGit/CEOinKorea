@@ -1,0 +1,5 @@
+[
+  {"id":"basic","name":"기본형 용병","max_hp":100,"attack":20,"defense":10,"speed":10,"hire_cost":100000,"skill_id":"strike","skill_cooldown":3},
+  {"id":"defender","name":"방어형 용병","max_hp":130,"attack":16,"defense":16,"speed":7,"hire_cost":150000,"skill_id":"protect","skill_cooldown":4},
+  {"id":"agile","name":"기동형 용병","max_hp":80,"attack":23,"defense":7,"speed":15,"hire_cost":150000,"skill_id":"disrupt","skill_cooldown":3}
+]

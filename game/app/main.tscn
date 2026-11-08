@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bibxv5gvuxsdk"]
+
+[ext_resource type="PackedScene" path="res://game/world/korea_world.tscn" id="1_world"]
+
+[node name="Main" unique_id=1364434171 instance=ExtResource("1_world")]
+
+[node name="Label" parent="Map/SeoulTown" index="0"]
+offset_left = 40.0
+offset_top = 60.0
+offset_right = 40.0
+offset_bottom = 60.0
+
+[node name="Label" parent="Map/IncheonHarbor" index="0"]
+offset_left = 35.0
+offset_top = 55.0
+offset_right = 35.0
+offset_bottom = 55.0
+
+[node name="Portrait" parent="UI/Party/Members/PlayerSlot" index="0"]
+layout_mode = 2
+
+[node name="Portrait" parent="UI/Party/Members/StaffSlot" index="0"]
+layout_mode = 2

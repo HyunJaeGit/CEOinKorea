@@ -1,0 +1,5 @@
+[
+ {"id":"beginner","name":"초급","columns":6,"rows":6,"pairs":18,"time_limit_seconds":90,"reward":20000,"fatigue_cost":20,"unlock_after":""},
+ {"id":"intermediate","name":"중급","columns":8,"rows":6,"pairs":24,"time_limit_seconds":90,"reward":40000,"fatigue_cost":30,"unlock_after":"beginner"},
+ {"id":"advanced","name":"고급","columns":8,"rows":8,"pairs":32,"time_limit_seconds":90,"reward":70000,"fatigue_cost":40,"unlock_after":"intermediate"}
+]

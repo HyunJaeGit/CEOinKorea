@@ -1,0 +1,407 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://game/world/korea_world.gd" id="1_world"]
+[ext_resource type="Script" path="res://game/world/player.gd" id="2_player"]
+[ext_resource type="Theme" path="res://game/ui/game_theme.tres" id="3_theme"]
+[ext_resource type="Texture2D" path="res://assets/protagonist_8dir_sheet.png" id="4_character"]
+[ext_resource type="Texture2D" path="res://assets/staff_01_portrait.png" id="6_staff"]
+[ext_resource type="Texture2D" path="res://assets/seoul_office.png" id="7_office"]
+[ext_resource type="Texture2D" path="res://assets/seoul_city_hall.png" id="8_seoul_hall"]
+[ext_resource type="Texture2D" path="res://assets/incheon_city_hall.png" id="9_incheon_hall"]
+[ext_resource type="Texture2D" path="res://assets/party_roster_plaque.png" id="10_roster_plaque"]
+[sub_resource type="RectangleShape2D" id="RectangleShape_obstacle"]
+size = Vector2(220, 90)
+[sub_resource type="RectangleShape2D" id="RectangleShape_player"]
+size = Vector2(28, 22)
+[sub_resource type="CircleShape2D" id="CircleShape_building"]
+radius = 150.0
+[sub_resource type="StyleBoxFlat" id="PortraitCard"]
+bg_color = Color(0.91, 0.88, 0.77, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.47, 0.59, 0.45, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+[sub_resource type="AtlasTexture" id="HeroPortrait"]
+atlas = ExtResource("4_character")
+region = Rect2(20, 640, 280, 610)
+[sub_resource type="AtlasTexture" id="StaffPortrait"]
+atlas = ExtResource("6_staff")
+region = Rect2(0, 0, 1254, 1254)
+
+[node name="KoreaWorld" type="Node2D"]
+script = ExtResource("1_world")
+[node name="Map" type="Node2D" parent="."]
+[node name="WorldObjects" type="Node2D" parent="."]
+y_sort_enabled = true
+z_index = 4
+[node name="Land" type="Polygon2D" parent="Map"]
+polygon = PackedVector2Array(0, 0, 1800, 0, 1800, 900, 0, 900)
+color = Color(0.3, 0.45, 0.34, 1)
+[node name="River" type="Polygon2D" parent="Map"]
+polygon = PackedVector2Array(585, 0, 594, 80, 614, 160, 640, 240, 666, 310, 680, 360, 675, 390, 655, 420, 630, 450, 610, 480, 600, 520, 605, 560, 620, 600, 640, 650, 650, 700, 645, 760, 630, 820, 620, 890, 735, 890, 750, 820, 770, 750, 790, 680, 810, 610, 820, 560, 814, 520, 800, 490, 780, 460, 760, 430, 748, 400, 750, 370, 765, 330, 785, 280, 800, 230, 810, 180, 815, 130, 820, 80, 830, 0)
+color = Color(0.22, 0.48, 0.59, 1)
+[node name="SeoulRoadEdge" type="Line2D" parent="Map"]
+z_index = 2
+width = 34.0
+default_color = Color(0.31, 0.28, 0.23, 1)
+points = PackedVector2Array(290, 600, 420, 515, 540, 430, 675, 405, 795, 418, 925, 405, 1050, 455, 1165, 545, 1305, 680)
+[node name="SeoulRoad" type="Line2D" parent="Map"]
+z_index = 3
+width = 25.0
+default_color = Color(0.72, 0.62, 0.45, 1)
+points = PackedVector2Array(290, 600, 420, 515, 540, 430, 675, 405, 795, 418, 925, 405, 1050, 455, 1165, 545, 1305, 680)
+[node name="IncheonRoadEdge" type="Line2D" parent="Map"]
+z_index = 2
+width = 28.0
+default_color = Color(0.31, 0.28, 0.23, 1)
+points = PackedVector2Array(210, 640, 300, 650, 375, 690, 445, 755)
+[node name="IncheonRoad" type="Line2D" parent="Map"]
+z_index = 3
+width = 20.0
+default_color = Color(0.72, 0.62, 0.45, 1)
+points = PackedVector2Array(210, 640, 300, 650, 375, 690, 445, 755)
+[node name="SeoulTown" type="Polygon2D" parent="Map"]
+position = Vector2(430, 300)
+polygon = PackedVector2Array(0, 0, 210, -30, 270, 140, 70, 210, -55, 110)
+color = Color(0.43, 0.54, 0.44, 1)
+[node name="Label" type="Label" parent="Map/SeoulTown"]
+position = Vector2(40, 60)
+text = "서울 · 한강"
+[node name="IncheonHarbor" type="Polygon2D" parent="Map"]
+position = Vector2(240, 570)
+polygon = PackedVector2Array(0, 0, 210, -45, 260, 130, 60, 200, -60, 100)
+color = Color(0.36, 0.52, 0.53, 1)
+[node name="Label" type="Label" parent="Map/IncheonHarbor"]
+position = Vector2(35, 55)
+text = "인천 · 서해 항구"
+[node name="SuwonTown" type="Polygon2D" parent="Map"]
+position = Vector2(1370, 300)
+polygon = PackedVector2Array(-110, 0, -55, -70, 70, -55, 135, 8, 58, 85, -75, 68)
+color = Color(0.42, 0.54, 0.43, 1)
+[node name="Label" type="Label" parent="Map/SuwonTown"]
+position = Vector2(12, 10)
+text = "수원 · 산업도시"
+[node name="CheonanTown" type="Polygon2D" parent="Map"]
+position = Vector2(970, 700)
+polygon = PackedVector2Array(-120, 8, -62, -58, 65, -52, 132, 12, 85, 82, -65, 67)
+color = Color(0.51, 0.57, 0.4, 1)
+[node name="Label" type="Label" parent="Map/CheonanTown"]
+position = Vector2(8, 18)
+text = "천안 · 곡창지대"
+[node name="SeoulOffice" type="Node2D" parent="WorldObjects"]
+position = Vector2(940, 348)
+metadata/region_id = "seoul"
+[node name="Building" type="Sprite2D" parent="WorldObjects/SeoulOffice"]
+position = Vector2(0, -78)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("7_office")
+[node name="Label" type="Label" parent="WorldObjects/SeoulOffice"]
+position = Vector2(-54, -128)
+text = "장사의신 사옥"
+[node name="Entrance" type="Area2D" parent="WorldObjects/SeoulOffice"]
+groups = ["entrances"]
+metadata/region_id = "seoul"
+metadata/kind = "office"
+metadata/label = "사옥"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldObjects/SeoulOffice/Entrance"]
+shape = SubResource("CircleShape_building")
+[node name="SeoulHall" type="Node2D" parent="WorldObjects"]
+position = Vector2(1320, 710)
+metadata/region_id = "seoul"
+[node name="Building" type="Sprite2D" parent="WorldObjects/SeoulHall"]
+position = Vector2(0, -78)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("8_seoul_hall")
+[node name="Label" type="Label" parent="WorldObjects/SeoulHall"]
+position = Vector2(-50, -130)
+text = "서울시청"
+[node name="Entrance" type="Area2D" parent="WorldObjects/SeoulHall"]
+groups = ["entrances"]
+metadata/region_id = "seoul"
+metadata/kind = "city_hall"
+metadata/label = "서울시청"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldObjects/SeoulHall/Entrance"]
+shape = SubResource("CircleShape_building")
+[node name="IncheonHall" type="Node2D" parent="WorldObjects"]
+position = Vector2(450, 780)
+metadata/region_id = "incheon"
+[node name="Building" type="Sprite2D" parent="WorldObjects/IncheonHall"]
+position = Vector2(0, -78)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("9_incheon_hall")
+[node name="Label" type="Label" parent="WorldObjects/IncheonHall"]
+position = Vector2(-48, -128)
+text = "인천시청"
+[node name="Entrance" type="Area2D" parent="WorldObjects/IncheonHall"]
+groups = ["entrances"]
+metadata/region_id = "incheon"
+metadata/kind = "city_hall"
+metadata/label = "인천시청"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldObjects/IncheonHall/Entrance"]
+shape = SubResource("CircleShape_building")
+[node name="SuwonHall" type="Node2D" parent="WorldObjects"]
+position = Vector2(1500, 470)
+metadata/region_id = "suwon"
+[node name="Building" type="Sprite2D" parent="WorldObjects/SuwonHall"]
+position = Vector2(0, -78)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("8_seoul_hall")
+[node name="Label" type="Label" parent="WorldObjects/SuwonHall"]
+position = Vector2(-48, -128)
+text = "수원시청"
+[node name="Entrance" type="Area2D" parent="WorldObjects/SuwonHall"]
+groups = ["entrances"]
+metadata/region_id = "suwon"
+metadata/kind = "city_hall"
+metadata/label = "수원시청"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldObjects/SuwonHall/Entrance"]
+shape = SubResource("CircleShape_building")
+[node name="CheonanHall" type="Node2D" parent="WorldObjects"]
+position = Vector2(1100, 790)
+metadata/region_id = "cheonan"
+[node name="Building" type="Sprite2D" parent="WorldObjects/CheonanHall"]
+position = Vector2(0, -78)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("9_incheon_hall")
+[node name="Label" type="Label" parent="WorldObjects/CheonanHall"]
+position = Vector2(-48, -128)
+text = "천안시청"
+[node name="Entrance" type="Area2D" parent="WorldObjects/CheonanHall"]
+groups = ["entrances"]
+metadata/region_id = "cheonan"
+metadata/kind = "city_hall"
+metadata/label = "천안시청"
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldObjects/CheonanHall/Entrance"]
+shape = SubResource("CircleShape_building")
+[node name="OfficeBlocker" type="StaticBody2D" parent="Map"]
+position = Vector2(1015, 300)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/OfficeBlocker"]
+shape = SubResource("RectangleShape_obstacle")
+[node name="SeoulHallBlocker" type="StaticBody2D" parent="Map"]
+position = Vector2(1380, 660)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/SeoulHallBlocker"]
+shape = SubResource("RectangleShape_obstacle")
+[node name="IncheonHallBlocker" type="StaticBody2D" parent="Map"]
+position = Vector2(510, 730)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/IncheonHallBlocker"]
+shape = SubResource("RectangleShape_obstacle")
+[node name="Player" type="CharacterBody2D" parent="WorldObjects"]
+position = Vector2(930, 470)
+script = ExtResource("2_player")
+[node name="Body" type="Sprite2D" parent="WorldObjects/Player"]
+centered = true
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldObjects/Player"]
+shape = SubResource("RectangleShape_player")
+[node name="Camera2D" type="Camera2D" parent="WorldObjects/Player"]
+limit_left = 0
+limit_top = 0
+limit_right = 1800
+limit_bottom = 900
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+[node name="UI" type="CanvasLayer" parent="."]
+[node name="Party" type="Control" parent="UI"]
+offset_left = 12.0
+offset_top = 82.0
+offset_right = 232.0
+offset_bottom = 632.0
+mouse_filter = 0
+[node name="Plaque" type="TextureRect" parent="UI/Party"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10_roster_plaque")
+expand_mode = 1
+stretch_mode = 4
+[node name="Members" type="VBoxContainer" parent="UI/Party"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 88.0
+offset_right = -34.0
+offset_bottom = -46.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+[node name="PlayerSlot" type="HBoxContainer" parent="UI/Party/Members"]
+layout_mode = 2
+size_flags_vertical = 3
+[node name="Portrait" type="Control" parent="UI/Party/Members/PlayerSlot"]
+custom_minimum_size = Vector2(52, 66)
+[node name="Frame" type="Panel" parent="UI/Party/Members/PlayerSlot/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("PortraitCard")
+mouse_filter = 2
+[node name="Character" type="TextureRect" parent="UI/Party/Members/PlayerSlot/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("HeroPortrait")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="UI/Party/Members/PlayerSlot"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 64)
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.97, 0.94, 0.83, 1)
+text = "주인공\n이동 대표"
+[node name="StaffSlot" type="HBoxContainer" parent="UI/Party/Members"]
+layout_mode = 2
+size_flags_vertical = 3
+[node name="Portrait" type="Control" parent="UI/Party/Members/StaffSlot"]
+custom_minimum_size = Vector2(52, 66)
+[node name="Frame" type="Panel" parent="UI/Party/Members/StaffSlot/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("PortraitCard")
+mouse_filter = 2
+[node name="Character" type="TextureRect" parent="UI/Party/Members/StaffSlot/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("StaffPortrait")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="UI/Party/Members/StaffSlot"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 64)
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.97, 0.94, 0.83, 1)
+text = "직원 1\n동행"
+[node name="CompanionSlot2" type="HBoxContainer" parent="UI/Party/Members"]
+layout_mode = 2
+size_flags_vertical = 3
+[node name="Portrait" type="Control" parent="UI/Party/Members/CompanionSlot2"]
+custom_minimum_size = Vector2(52, 66)
+[node name="Frame" type="Panel" parent="UI/Party/Members/CompanionSlot2/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("PortraitCard")
+mouse_filter = 2
+[node name="Character" type="TextureRect" parent="UI/Party/Members/CompanionSlot2/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("StaffPortrait")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="UI/Party/Members/CompanionSlot2"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 64)
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.97, 0.94, 0.83, 1)
+text = "빈 슬롯"
+[node name="CompanionSlot3" type="HBoxContainer" parent="UI/Party/Members"]
+layout_mode = 2
+size_flags_vertical = 3
+[node name="Portrait" type="Control" parent="UI/Party/Members/CompanionSlot3"]
+custom_minimum_size = Vector2(52, 66)
+[node name="Frame" type="Panel" parent="UI/Party/Members/CompanionSlot3/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("PortraitCard")
+mouse_filter = 2
+[node name="Character" type="TextureRect" parent="UI/Party/Members/CompanionSlot3/Portrait"]
+layout_mode = 1
+anchors_preset = 15
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("StaffPortrait")
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="UI/Party/Members/CompanionSlot3"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 64)
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.97, 0.94, 0.83, 1)
+text = "빈 슬롯"
+[node name="TopBar" type="PanelContainer" parent="UI"]
+theme = ExtResource("3_theme")
+offset_left = 540.0
+offset_top = 12.0
+offset_right = 1390.0
+offset_bottom = 82.0
+[node name="Rows" type="HBoxContainer" parent="UI/TopBar"]
+layout_mode = 2
+[node name="Status" type="Label" parent="UI/TopBar/Rows"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "서울"
+[node name="RegionSwitch" type="Button" parent="UI/TopBar/Rows"]
+layout_mode = 2
+text = "인천으로 이동"
+[node name="BottomBar" type="PanelContainer" parent="UI"]
+theme = ExtResource("3_theme")
+offset_left = 500.0
+offset_top = 815.0
+offset_right = 1100.0
+offset_bottom = 875.0
+[node name="Hint" type="Label" parent="UI/BottomBar"]
+layout_mode = 2
+text = "방향키 직접 이동 · 지면 클릭 이동 · 건물 클릭 후 메뉴 선택"
+[node name="InteractionMenu" type="PanelContainer" parent="UI"]
+theme = ExtResource("3_theme")
+visible = false
+offset_left = 520.0
+offset_top = 300.0
+offset_right = 900.0
+offset_bottom = 470.0
+mouse_filter = 0
+[node name="Rows" type="VBoxContainer" parent="UI/InteractionMenu"]
+layout_mode = 2
+[node name="Title" type="Label" parent="UI/InteractionMenu/Rows"]
+layout_mode = 2
+text = "건물"
+[node name="Enter" type="Button" parent="UI/InteractionMenu/Rows"]
+layout_mode = 2
+text = "내부 보기"
+[node name="Cancel" type="Button" parent="UI/InteractionMenu/Rows"]
+layout_mode = 2
+text = "취소"

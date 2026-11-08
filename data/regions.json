@@ -1,0 +1,6 @@
+{"regions":[
+ {"id":"seoul","name":"서울","map_position":{"x":1320,"y":710},"land_accessible":true,"description":"수도권 중심 업무·유통 거점","industry":"행정·도소매·전자부품","payout_multiplier":1.0},
+ {"id":"incheon","name":"인천","map_position":{"x":450,"y":780},"land_accessible":true,"description":"서해 항만과 수산 유통 거점","industry":"항만·수산·교역","payout_multiplier":1.15},
+ {"id":"suwon","name":"수원","map_position":{"x":1500,"y":518},"land_accessible":true,"description":"수도권 남부 산업·상업 거점","industry":"산업·섬유·전자","payout_multiplier":1.1},
+ {"id":"cheonan","name":"천안","map_position":{"x":1100,"y":790},"land_accessible":true,"description":"중부권 농산물 유통 거점","industry":"농업·곡물·교역","payout_multiplier":1.2}
+]}

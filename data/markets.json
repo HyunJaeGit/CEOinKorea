@@ -1,0 +1,16 @@
+[
+ {"id":"seoul_fresh","region_id":"seoul","name":"서울 청과·수산 시장","product_ids":["seafood","fruit"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"seoul_grain","region_id":"seoul","name":"서울 곡물 시장","product_ids":["rice"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"seoul_goods","region_id":"seoul","name":"서울 생활·섬유 시장","product_ids":["textile","daily_goods"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"seoul_electronics","region_id":"seoul","name":"서울 전자부품 시장","product_ids":["electronics"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"incheon_seafood","region_id":"incheon","name":"인천 수산 시장","product_ids":["seafood"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"incheon_grain","region_id":"incheon","name":"인천 곡물 시장","product_ids":["rice"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"incheon_fresh","region_id":"incheon","name":"인천 청과 시장","product_ids":["fruit"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"incheon_trade","region_id":"incheon","name":"인천 교역 시장","product_ids":["textile","daily_goods","electronics"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"suwon_industry","region_id":"suwon","name":"수원 산업·섬유 시장","product_ids":["textile","electronics"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"suwon_fresh","region_id":"suwon","name":"수원 생활·과일 시장","product_ids":["fruit","daily_goods"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"suwon_grain","region_id":"suwon","name":"수원 곡물 시장","product_ids":["rice"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"cheonan_grain","region_id":"cheonan","name":"천안 곡물 시장","product_ids":["rice"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"cheonan_fresh","region_id":"cheonan","name":"천안 청과 시장","product_ids":["fruit","daily_goods"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40},
+ {"id":"cheonan_trade","region_id":"cheonan","name":"천안 교역 시장","product_ids":["textile","electronics"],"initial_stock":300,"target_stock":300,"average_production":40,"average_consumption":40}
+]

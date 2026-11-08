@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://game/ui/time_hud.gd" id="1_script"]
+[ext_resource type="Theme" path="res://game/ui/game_theme.tres" id="2_theme"]
+[node name="TimeHUD" type="CanvasLayer"]
+script = ExtResource("1_script")
+[node name="Panel" type="PanelContainer" parent="."]
+theme = ExtResource("2_theme")
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -246.0
+offset_right = 492.0
+offset_bottom = -12.0
+[node name="Rows" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+[node name="Date" type="Label" parent="Panel/Rows"]
+layout_mode = 2
+text = "2025-01-20"
+[node name="Accounts" type="Label" parent="Panel/Rows"]
+layout_mode = 2
+text = "개인 · 법인"
+[node name="Vehicle" type="Label" parent="Panel/Rows"]
+layout_mode = 2
+text = "활성 차량 도보 · 거리 비용 0원/km"
+[node name="Invoice" type="Label" parent="Panel/Rows"]
+layout_mode = 2
+text = "다음 고정비 납부일"
+[node name="Status" type="Label" parent="Panel/Rows"]
+layout_mode = 2
+text = "진행"
+[node name="Alert" type="Label" parent="Panel/Rows"]
+layout_mode = 2
+text = ""

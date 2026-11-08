@@ -1,0 +1,4 @@
+[
+ {"id":"logistics_disruption_202502","start_date":"2025-02-01","duration_days":14,"title":"해외 물류 차질","body":"가상 시나리오: 특정 해협의 외교 분쟁으로 전자부품 수입 물류가 일시적으로 지연되고 있습니다. 이 기사는 게임 세계관 안의 사건입니다.","dialogue":"재무 담당: 전자부품 수급이 2주 동안 줄어들 전망입니다. 재고와 현지 매입가를 함께 확인하세요.","region_id":"seoul","product_id":"electronics","supply_factor":0.5,"demand_factor":1.0,"priority":10,"asset_note":"외부 일러스트 없이 자체 제작한 임시 색상 패널과 텍스트. 외부 자료/유료 생성 미사용."},
+ {"id":"consumption_drop_202503","start_date":"2025-03-01","duration_days":14,"title":"소비 위축","body":"가상 시나리오: 소비 심리가 약해지며 생활잡화 판매가 둔화되고 있습니다. 이 기사는 현실 뉴스가 아닌 게임용 설정입니다.","dialogue":"시장 조사 담당: 생활잡화 수요 계수가 낮아졌습니다. 지역별 재고 흐름을 살펴보겠습니다.","region_id":"seoul","product_id":"daily_goods","supply_factor":1.0,"demand_factor":0.6,"priority":20,"asset_note":"외부 일러스트 없이 자체 제작한 임시 색상 패널과 텍스트. 외부 자료/유료 생성 미사용."}
+]
