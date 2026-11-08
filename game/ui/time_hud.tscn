@@ -2,32 +2,96 @@
 [ext_resource type="Script" path="res://game/ui/time_hud.gd" id="1_script"]
 [ext_resource type="Theme" path="res://game/ui/game_theme.tres" id="2_theme"]
 [node name="TimeHUD" type="CanvasLayer"]
+layer = 2
 script = ExtResource("1_script")
 [node name="Panel" type="PanelContainer" parent="."]
 theme = ExtResource("2_theme")
-anchor_top = 1.0
-anchor_bottom = 1.0
 offset_left = 12.0
-offset_top = -246.0
-offset_right = 492.0
-offset_bottom = -12.0
+offset_top = 12.0
+offset_right = 536.0
+offset_bottom = 82.0
 [node name="Rows" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
-[node name="Date" type="Label" parent="Panel/Rows"]
+[node name="TopRow" type="HBoxContainer" parent="Panel/Rows"]
 layout_mode = 2
-text = "2025-01-20"
+[node name="Date" type="Label" parent="Panel/Rows/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+text = "2025.01.20 00:00 · 진행"
+[node name="Menu" type="Button" parent="Panel/Rows/TopRow"]
+custom_minimum_size = Vector2(54, 36)
+layout_mode = 2
+text = "메뉴"
 [node name="Accounts" type="Label" parent="Panel/Rows"]
 layout_mode = 2
-text = "개인 · 법인"
-[node name="Vehicle" type="Label" parent="Panel/Rows"]
-layout_mode = 2
-text = "활성 차량 도보 · 거리 비용 0원/km"
-[node name="Invoice" type="Label" parent="Panel/Rows"]
-layout_mode = 2
-text = "다음 고정비 납부일"
-[node name="Status" type="Label" parent="Panel/Rows"]
-layout_mode = 2
-text = "진행"
+theme_override_font_sizes/font_size = 14
+text = "개인 100,000원  ·  법인 1,000,000원"
 [node name="Alert" type="Label" parent="Panel/Rows"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 13
 text = ""
+autowrap_mode = 3
+[node name="UserMenu" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+[node name="Dimmer" type="ColorRect" parent="UserMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.08, 0.10, 0.76)
+mouse_filter = 0
+[node name="Center" type="CenterContainer" parent="UserMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+[node name="Card" type="PanelContainer" parent="UserMenu/Center"]
+custom_minimum_size = Vector2(520, 420)
+layout_mode = 2
+theme = ExtResource("2_theme")
+[node name="Margin" type="MarginContainer" parent="UserMenu/Center/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 18
+[node name="Rows" type="VBoxContainer" parent="UserMenu/Center/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+[node name="Title" type="Label" parent="UserMenu/Center/Card/Margin/Rows"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "운영 메뉴"
+[node name="Overview" type="Label" parent="UserMenu/Center/Card/Margin/Rows"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+text = "현재 위치와 계좌 정보"
+autowrap_mode = 3
+[node name="Feedback" type="Label" parent="UserMenu/Center/Card/Margin/Rows"]
+layout_mode = 2
+text = ""
+[node name="Resume" type="Button" parent="UserMenu/Center/Card/Margin/Rows"]
+layout_mode = 2
+text = "계속하기"
+[node name="Save" type="Button" parent="UserMenu/Center/Card/Margin/Rows"]
+layout_mode = 2
+text = "저장하기"
+[node name="Settings" type="Button" parent="UserMenu/Center/Card/Margin/Rows"]
+layout_mode = 2
+text = "설정"
+[node name="Quit" type="Button" parent="UserMenu/Center/Card/Margin/Rows"]
+layout_mode = 2
+text = "게임 종료"

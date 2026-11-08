@@ -24,7 +24,7 @@ func _command(command: String) -> void:
 			return
 		target_id = str($Card/Rows/Commands/Reserve.get_item_metadata($Card/Rows/Commands/Reserve.selected))
 	var result: Dictionary = GameSession.select_battle_command(command, target_id)
-	$Card/Rows/Result.text = "명령 적용" if result.ok else "명령을 사용할 수 없습니다: %s" % result.get("reason", "확인 필요")
+	$Card/Rows/Result.text = "턴이 끝났습니다." if result.ok else _reason_text(str(result.get("reason", "")))
 	_refresh()
 	if result.ok and not GameSession.battle_state.get("active", false):
 		call_deferred("_finish_scene")
@@ -41,9 +41,9 @@ func _refresh() -> void:
 	var active_id := str(battle.get("active_mercenary_id", ""))
 	var mercenary: Dictionary = GameSession.mercenaries.get(active_id, {})
 	var mercenary_def: Dictionary = GameSession.mercenary_definitions.get(str(mercenary.get("type_id", "")), {})
-	$Card/Rows/Title.text = "야외 조우 · %s전투" % ("" if battle.get("result", "").is_empty() else "결과 · ")
-	$Card/Rows/Party.text = "%s · 체력 %d/%d · 방어 %d · 속도 %d\n턴 %d · 고유기 재사용 상태는 명령창에서 확인" % [mercenary_def.get("name", "출전 용병"), mercenary.get("hp", 0), mercenary_def.get("max_hp", 0), mercenary_def.get("defense", 0), mercenary_def.get("speed", 0), battle.get("turn", 1)]
-	var enemies_text := "상대\n"
+	$Card/Rows/Title.text = "전투  ·  턴 %d" % int(battle.get("turn", 1))
+	$Card/Rows/Party.text = "%s  ·  HP %d/%d  ·  방어 %d  ·  속도 %d" % [mercenary_def.get("name", "출전 용병"), mercenary.get("hp", 0), mercenary_def.get("max_hp", 0), mercenary_def.get("defense", 0), mercenary_def.get("speed", 0)]
+	var enemies_text := "상대 팀\n"
 	for enemy in battle.get("enemies", []):
 		enemies_text += "%s · 체력 %d/%d\n" % [enemy.get("name", "적"), enemy.get("hp", 0), enemy.get("max_hp", 0)]
 	$Card/Rows/Enemies.text = enemies_text
@@ -52,7 +52,9 @@ func _refresh() -> void:
 	var skill_label: String = str({"strike":"강타", "protect":"보호", "disrupt":"교란"}.get(skill_id, "고유기"))
 	$Card/Rows/Commands/Skill.text = "고유기 · %s" % skill_label
 	var last_use := int(battle.get("skill_used_turn", {}).get(active_id, -1000))
-	$Card/Rows/Commands/Skill.disabled = skill_id.is_empty() or int(battle.get("turn", 1)) - last_use < int(mercenary_def.get("skill_cooldown", 3))
+	var turns_until_skill := maxi(0, int(mercenary_def.get("skill_cooldown", 3)) - (int(battle.get("turn", 1)) - last_use))
+	$Card/Rows/Commands/Skill.disabled = skill_id.is_empty() or turns_until_skill > 0
+	$Card/Rows/Commands/Skill.tooltip_text = "바로 사용할 수 있습니다." if turns_until_skill == 0 else "%d턴 뒤 다시 사용할 수 있습니다." % turns_until_skill
 	var reserve := $Card/Rows/Commands/Reserve
 	var previous := str(reserve.get_item_metadata(reserve.selected)) if reserve.item_count > 0 else ""
 	reserve.clear()
@@ -64,3 +66,9 @@ func _refresh() -> void:
 		reserve.set_item_metadata(reserve.get_item_count() - 1, mercenary_id)
 		if mercenary_id == previous: reserve.select(reserve.get_item_count() - 1)
 	$Card/Rows/Commands/Switch.disabled = reserve.item_count == 0
+
+func _reason_text(reason: String) -> String:
+	return {
+		"invalid_command": "이 행동은 사용할 수 없습니다.", "invalid_switch": "교체할 용병을 다시 선택해주세요.",
+		"skill_unavailable": "고유기를 아직 사용할 수 없습니다.", "battle_not_active": "전투가 이미 끝났습니다."
+	}.get(reason, "명령을 사용할 수 없습니다. 다른 행동을 선택해주세요.")

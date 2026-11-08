@@ -20,6 +20,7 @@ func _run() -> void:
 		_check(GameSession.captivity_state.get("stage", "") == "released", "separate process restores paid release cutscene")
 		_check(GameSession.rescue_debts.size() == 1 and int(GameSession.rescue_debts[0].get("remaining", 0)) == 49000, "separate process restores rescue debt")
 		_check(GameSession.processed_result_ids.has(str(GameSession.captivity_state.get("result_id", "")) + ":paid"), "separate process restores ransom result ID")
+		_check(GameSession.get_cargo_capacity_g("staff_01") == 25000, "separate process restores the employee cargo ability")
 		print("PHASE4_RESTART_%s" % ("OK" if failures == 0 else "FAILED"))
 		get_tree().quit(0 if failures == 0 else 1)
 		return
@@ -57,11 +58,34 @@ func _run() -> void:
 	var duplicate_purchase: Dictionary = GameSession.purchase_vehicle("small_truck", "phase4-truck")
 	_check(not duplicate_purchase.ok, "repeated vehicle order does not debit twice")
 	var cash_before := int(GameSession.accounts["corporate"])
-	_check(GameSession.charge_vehicle_distance(2.0).ok, "first fractional distance accepted")
-	_check(GameSession.accounts["corporate"] == cash_before, "fractional vehicle fee remains unrounded in storage")
-	var distance_payment: Dictionary = GameSession.charge_vehicle_distance(3.0)
-	_check(distance_payment.ok and int(distance_payment.charged) == 1, "fractional vehicle fees accumulate to one won")
-	_check(GameSession.accounts["corporate"] == cash_before - 1, "distance fee is charged to corporate account")
+	var empty_vehicle_cost: Dictionary = GameSession.charge_vehicle_distance(1000.0)
+	_check(empty_vehicle_cost.ok and int(empty_vehicle_cost.charged) == 0, "empty vehicle travel has no cargo cost")
+	_check(GameSession.accounts["corporate"] == cash_before, "empty travel preserves corporate funds")
+	GameSession.employee_states["staff_01"]["cargo_capacity_g"] = 25000
+	_seed_cargo("player", 20)
+	_seed_cargo("staff_01", 25)
+	_seed_cargo("vehicle:small_truck", 500)
+	_check(GameSession.get_cargo_capacity_g("staff_01") == 25000, "person capacity reads the saved ability value")
+	_check(GameSession.get_moving_trade_cargo_weight_g() == 545000 and GameSession.get_moving_cargo_capacity_g() == 545000, "moving cargo ratio includes party and active vehicle goods")
+	var full_load_cost: Dictionary = GameSession.charge_vehicle_distance(1000.0)
+	_check(full_load_cost.ok and int(full_load_cost.charged) == 200, "full load charges the existing small truck rate per km")
+	_check(GameSession.accounts["corporate"] == cash_before - 200, "loaded travel cost is charged to corporate account")
+	GameSession.inventories["staff_01"] = {}
+	GameSession.inventories["vehicle:small_truck"] = {}
+	GameSession.inventory_costs["staff_01"] = {}
+	GameSession.inventory_costs["vehicle:small_truck"] = {}
+	_seed_cargo("player", 1)
+	var fractional_cost: Dictionary = GameSession.charge_vehicle_distance(1000.0)
+	_check(fractional_cost.ok and int(fractional_cost.charged) == 0, "partial load keeps sub-won travel cost: %s" % str(fractional_cost))
+	var accumulated_cost: Dictionary = GameSession.charge_vehicle_distance(2000.0)
+	_check(accumulated_cost.ok and int(accumulated_cost.charged) == 1, "partial load fractions accumulate before corporate debit: %s remainder=%s" % [str(accumulated_cost), str(GameSession.vehicle_cost_remainders)])
+	_check(GameSession.accounts["corporate"] == cash_before - 201, "partial load charges the accumulated proportional fare once: %d" % int(GameSession.accounts["corporate"]))
+	GameSession.inventories["player"] = {}
+	GameSession.inventories["staff_01"] = {}
+	GameSession.inventories["vehicle:small_truck"] = {}
+	GameSession.inventory_costs["player"] = {}
+	GameSession.inventory_costs["staff_01"] = {}
+	GameSession.inventory_costs["vehicle:small_truck"] = {}
 
 	_seed_cargo("player", 20)
 	var moved: Dictionary = GameSession.transfer_goods("player", "vehicle:small_truck", "seafood", 20)

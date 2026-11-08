@@ -70,7 +70,7 @@ func _start_level() -> void:
 	definition = level_defs.get(level_id, {})
 	if definition.is_empty(): return
 	if GameSession.mahjong_fatigue + int(definition.fatigue_cost) > 100:
-		_refresh_status("피로도가 부족합니다. 게임 날짜가 바뀌면 5 회복됩니다.")
+		_refresh_status("피로도가 부족합니다. 날짜가 바뀌면 회복됩니다.")
 		return
 	seed_value = int(Time.get_ticks_usec())
 	board = Rules.generate_board(int(definition.columns), int(definition.rows), int(definition.pairs), seed_value)
@@ -79,7 +79,7 @@ func _start_level() -> void:
 		return
 	var result: Dictionary = GameSession.start_mahjong(level_id, GameSession.current_region, board)
 	if not result.ok:
-		_refresh_status("시작할 수 없습니다: 피로도 또는 작업장 상태를 확인하세요.")
+		_refresh_status("지금은 시작할 수 없습니다. 피로도를 확인해주세요.")
 		return
 	GameSession.mahjong_state["seed"] = seed_value
 	GameSession.save_game()
@@ -146,7 +146,7 @@ func _relayout() -> void:
 	GameSession.mahjong_state["board"] = board.duplicate()
 	GameSession.save_game()
 	_build_board()
-	_refresh_status("길이 막혀 남은 패를 다시 배치했습니다. 시간과 피로도는 유지됩니다.")
+	_refresh_status("막힌 패를 다시 섞었습니다.")
 
 func _hint() -> void:
 	if not started or bool(GameSession.mahjong_state.get("hint_used", false)): return
@@ -163,11 +163,11 @@ func _hint() -> void:
 	_set_tile_selected(second, true)
 	GameSession.mahjong_state["hint_used"] = true
 	$Margin/Panel/Buttons/Hint.disabled = true
-	_refresh_status("연결할 수 있는 같은 패 두 개를 표시했습니다. 힌트는 한 번만 사용할 수 있습니다.")
+	_refresh_status("연결할 수 있는 패를 표시했습니다.")
 
 func _give_up() -> void:
 	if started:
-		_finish(false, "작업을 포기했습니다. 수당은 지급되지 않습니다.")
+		_finish(false, "도전을 포기했습니다.")
 	else:
 		SceneRouter.exit_mahjong()
 
@@ -181,13 +181,21 @@ func _finish(success: bool, message: String) -> void:
 	$Margin/Panel/Buttons/Exit.pressed.disconnect(_give_up)
 	$Margin/Panel/Buttons/Exit.pressed.connect(SceneRouter.exit_mahjong)
 	var payout := int(result.get("payout", 0))
-	_refresh_status("%s%s · 개인 계좌 수당 %d원" % [message, " 성공" if result.ok and success else " 실패", payout])
+	_refresh_status("%s  ·  %s%s" % ["성공" if result.ok and success else "실패", "수당 +%s원" % _money(payout) if payout > 0 else "수당 없음", "" if message.is_empty() else "  ·  " + message])
 
 func _update_status() -> void:
 	if definition.is_empty():
-		_refresh_status("지역: %s · 피로도 %d/100 · 초급부터 도전할 수 있습니다." % [GameSession.region_definitions.get(GameSession.current_region, {}).get("name", GameSession.current_region), GameSession.mahjong_fatigue])
+		_refresh_status("%s  ·  피로도 %d/100" % [GameSession.region_definitions.get(GameSession.current_region, {}).get("name", GameSession.current_region), GameSession.mahjong_fatigue])
 		return
-	_refresh_status("남은 시간 %.1f초 · 제거 %d/%d쌍 · 피로도 %d/100" % [maxf(0.0, float(definition.time_limit_seconds) - elapsed_seconds), int(definition.pairs) - int(board.count(0)) / 2, int(definition.pairs), GameSession.mahjong_fatigue])
+	_refresh_status("남은 시간 %.0f초  ·  남은 패 %d개  ·  피로도 %d/100" % [maxf(0.0, float(definition.time_limit_seconds) - elapsed_seconds), board.size() - int(board.count(0)), GameSession.mahjong_fatigue])
+
+func _money(value: int) -> String:
+	var digits := str(value)
+	var grouped := ""
+	while digits.length() > 3:
+		grouped = "," + digits.right(3) + grouped
+		digits = digits.left(digits.length() - 3)
+	return digits + grouped
 
 func _refresh_status(message: String) -> void:
 	$Margin/Panel/Status.text = message

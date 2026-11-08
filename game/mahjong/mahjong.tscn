@@ -1,6 +1,7 @@
 [gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://game/mahjong/mahjong.gd" id="1_script"]
+[ext_resource type="Theme" path="res://game/ui/game_theme.tres" id="2_theme"]
 
 [node name="MahjongWorkshop" type="Control"]
 layout_mode = 3
@@ -10,6 +11,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+theme = ExtResource("2_theme")
 
 [node name="Backdrop" type="ColorRect" parent="."]
 layout_mode = 1

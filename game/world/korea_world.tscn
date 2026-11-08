@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://game/world/korea_world.gd" id="1_world"]
 [ext_resource type="Script" path="res://game/world/player.gd" id="2_player"]
@@ -9,6 +9,8 @@
 [ext_resource type="Texture2D" path="res://assets/seoul_city_hall.png" id="8_seoul_hall"]
 [ext_resource type="Texture2D" path="res://assets/incheon_city_hall.png" id="9_incheon_hall"]
 [ext_resource type="Texture2D" path="res://assets/party_roster_plaque.png" id="10_roster_plaque"]
+[ext_resource type="Texture2D" path="res://assets/suwon_city_hall.png" id="11_suwon_hall"]
+[ext_resource type="Texture2D" path="res://assets/cheonan_city_hall.png" id="12_cheonan_hall"]
 [sub_resource type="RectangleShape2D" id="RectangleShape_obstacle"]
 size = Vector2(220, 90)
 [sub_resource type="RectangleShape2D" id="RectangleShape_player"]
@@ -72,6 +74,11 @@ color = Color(0.43, 0.54, 0.44, 1)
 [node name="Label" type="Label" parent="Map/SeoulTown"]
 position = Vector2(40, 60)
 text = "서울 · 한강"
+visible = false
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="IncheonHarbor" type="Polygon2D" parent="Map"]
 position = Vector2(240, 570)
 polygon = PackedVector2Array(0, 0, 210, -45, 260, 130, 60, 200, -60, 100)
@@ -79,6 +86,11 @@ color = Color(0.36, 0.52, 0.53, 1)
 [node name="Label" type="Label" parent="Map/IncheonHarbor"]
 position = Vector2(35, 55)
 text = "인천 · 서해 항구"
+visible = false
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="SuwonTown" type="Polygon2D" parent="Map"]
 position = Vector2(1370, 300)
 polygon = PackedVector2Array(-110, 0, -55, -70, 70, -55, 135, 8, 58, 85, -75, 68)
@@ -86,6 +98,11 @@ color = Color(0.42, 0.54, 0.43, 1)
 [node name="Label" type="Label" parent="Map/SuwonTown"]
 position = Vector2(12, 10)
 text = "수원 · 산업도시"
+visible = false
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="CheonanTown" type="Polygon2D" parent="Map"]
 position = Vector2(970, 700)
 polygon = PackedVector2Array(-120, 8, -62, -58, 65, -52, 132, 12, 85, 82, -65, 67)
@@ -93,6 +110,11 @@ color = Color(0.51, 0.57, 0.4, 1)
 [node name="Label" type="Label" parent="Map/CheonanTown"]
 position = Vector2(8, 18)
 text = "천안 · 곡창지대"
+visible = false
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="SeoulOffice" type="Node2D" parent="WorldObjects"]
 position = Vector2(940, 348)
 metadata/region_id = "seoul"
@@ -102,7 +124,13 @@ scale = Vector2(0.15, 0.15)
 texture = ExtResource("7_office")
 [node name="Label" type="Label" parent="WorldObjects/SeoulOffice"]
 position = Vector2(-54, -128)
-text = "장사의신 사옥"
+text = "서울 · 장사의신 사옥"
+visible = false
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="Entrance" type="Area2D" parent="WorldObjects/SeoulOffice"]
 groups = ["entrances"]
 metadata/region_id = "seoul"
@@ -119,7 +147,13 @@ scale = Vector2(0.15, 0.15)
 texture = ExtResource("8_seoul_hall")
 [node name="Label" type="Label" parent="WorldObjects/SeoulHall"]
 position = Vector2(-50, -130)
-text = "서울시청"
+text = "서울 · 시청"
+visible = false
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="Entrance" type="Area2D" parent="WorldObjects/SeoulHall"]
 groups = ["entrances"]
 metadata/region_id = "seoul"
@@ -136,7 +170,13 @@ scale = Vector2(0.15, 0.15)
 texture = ExtResource("9_incheon_hall")
 [node name="Label" type="Label" parent="WorldObjects/IncheonHall"]
 position = Vector2(-48, -128)
-text = "인천시청"
+text = "인천 · 시청"
+visible = false
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="Entrance" type="Area2D" parent="WorldObjects/IncheonHall"]
 groups = ["entrances"]
 metadata/region_id = "incheon"
@@ -150,10 +190,16 @@ metadata/region_id = "suwon"
 [node name="Building" type="Sprite2D" parent="WorldObjects/SuwonHall"]
 position = Vector2(0, -78)
 scale = Vector2(0.15, 0.15)
-texture = ExtResource("8_seoul_hall")
+texture = ExtResource("11_suwon_hall")
 [node name="Label" type="Label" parent="WorldObjects/SuwonHall"]
 position = Vector2(-48, -128)
-text = "수원시청"
+text = "수원 · 시청"
+visible = false
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="Entrance" type="Area2D" parent="WorldObjects/SuwonHall"]
 groups = ["entrances"]
 metadata/region_id = "suwon"
@@ -167,10 +213,16 @@ metadata/region_id = "cheonan"
 [node name="Building" type="Sprite2D" parent="WorldObjects/CheonanHall"]
 position = Vector2(0, -78)
 scale = Vector2(0.15, 0.15)
-texture = ExtResource("9_incheon_hall")
+texture = ExtResource("12_cheonan_hall")
 [node name="Label" type="Label" parent="WorldObjects/CheonanHall"]
 position = Vector2(-48, -128)
-text = "천안시청"
+text = "천안 · 시청"
+visible = false
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.2, 0.16, 1)
+theme_override_constants/outline_size = 4
 [node name="Entrance" type="Area2D" parent="WorldObjects/CheonanHall"]
 groups = ["entrances"]
 metadata/region_id = "cheonan"
@@ -366,7 +418,7 @@ text = "빈 슬롯"
 theme = ExtResource("3_theme")
 offset_left = 540.0
 offset_top = 12.0
-offset_right = 1390.0
+offset_right = 1588.0
 offset_bottom = 82.0
 [node name="Rows" type="HBoxContainer" parent="UI/TopBar"]
 layout_mode = 2

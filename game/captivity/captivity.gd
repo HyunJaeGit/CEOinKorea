@@ -23,7 +23,7 @@ func _advance() -> void:
 			SceneRouter.return_to_office_after_release()
 			return
 	if not result.ok:
-		$Card/Rows/Status.text = "진행할 수 없습니다: %s" % result.get("reason", "확인 필요")
+		$Card/Rows/Status.text = "지금은 진행할 수 없습니다. 다시 시도해주세요."
 	_refresh()
 
 
@@ -32,22 +32,22 @@ func _refresh() -> void:
 		return
 	var state: Dictionary = GameSession.captivity_state
 	var stage := str(state.get("stage", "call"))
-	$Card/Rows/Title.text = "회사 비상 연락 · 피랍 대응"
-	$Card/Rows/Details.text = "피랍 당시 법인 잔액 %s원\n최초 요구액 %s원 · 협상 후 %s원\n현재 법인 잔액 %s원" % [_money(int(state.get("base_corporate_balance", 0))), _money(int(state.get("requested_amount", 0))), _money(int(state.get("final_amount", 0))), _money(int(GameSession.accounts.get("corporate", 0)))]
+	$Card/Rows/Title.text = "긴급 연락"
+	$Card/Rows/Details.text = "요구액 %s원  ·  협상 후 %s원\n법인 잔액 %s원" % [_money(int(state.get("requested_amount", 0))), _money(int(state.get("final_amount", 0))), _money(int(GameSession.accounts.get("corporate", 0)))]
 	match stage:
 		"call":
-			$Card/Rows/Status.text = "회사 전화가 연결되었습니다. 담당 직원은 출장 중이어도 비상 응대할 수 있습니다."
-			$Card/Rows/Action.text = "회사에 전화"
+			$Card/Rows/Status.text = "회사에 연락해 도움을 요청하세요."
+			$Card/Rows/Action.text = "회사에 연락"
 		"negotiation":
-			$Card/Rows/Status.text = "직원이 법무 담당으로 요구액을 확인하고 협상합니다. 초기 겸임 직원의 할인 등급은 0입니다."
-			$Card/Rows/Action.text = "직원 협상 요청"
+			$Card/Rows/Status.text = "직원에게 요구액 협상을 맡깁니다."
+			$Card/Rows/Action.text = "협상 요청"
 		"payment":
 			var loan := maxi(0, int(state.get("final_amount", 0)) - int(GameSession.accounts.get("corporate", 0)))
-			$Card/Rows/Status.text = "부족액 %s원은 석방 전용 구조 대출로만 보충합니다. 3개월 분할 상환." % _money(loan)
-			$Card/Rows/Action.text = "지급 확정"
+			$Card/Rows/Status.text = "부족한 %s원은 석방 자금으로 충당합니다. 3개월 분할 상환." % _money(loan)
+			$Card/Rows/Action.text = "석방금 지급"
 		"released":
-			$Card/Rows/Status.text = "지급 완료 · 화물 손실은 이미 한 번만 기록되었습니다. 구조 대출 %s원" % _money(int(state.get("rescue_loan", 0)))
-			$Card/Rows/Action.text = "석방 컷씬 확인 · 사옥 복귀"
+			$Card/Rows/Status.text = "석방 완료  ·  구조 자금 %s원" % _money(int(state.get("rescue_loan", 0)))
+			$Card/Rows/Action.text = "사옥으로 돌아가기"
 
 
 func _money(value: int) -> String:

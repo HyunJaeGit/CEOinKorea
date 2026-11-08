@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 [ext_resource type="Script" path="res://game/news/news_archive.gd" id="1_script"]
+[ext_resource type="Theme" path="res://game/ui/game_theme.tres" id="2_theme"]
 [node name="NewsArchive" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -8,17 +9,26 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+theme = ExtResource("2_theme")
 [node name="Card" type="PanelContainer" parent="."]
-offset_left = 280.0
-offset_top = 190.0
-offset_right = 1320.0
-offset_bottom = 850.0
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.15
+anchor_top = 0.14
+anchor_right = 0.85
+anchor_bottom = 0.86
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 [node name="Panel" type="VBoxContainer" parent="."]
-offset_left = 300.0
-offset_top = 210.0
-offset_right = 1300.0
-offset_bottom = 830.0
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.17
+anchor_top = 0.16
+anchor_right = 0.83
+anchor_bottom = 0.84
+grow_horizontal = 2
+grow_vertical = 2
 [node name="Title" type="Label" parent="Panel"]
 layout_mode = 2
 text = "기사 보관함"

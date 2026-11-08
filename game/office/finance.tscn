@@ -17,23 +17,26 @@ color = Color(0.83, 0.88, 0.77, 1)
 mouse_filter = 2
 [node name="Panel" type="VBoxContainer" parent="."]
 layout_mode = 1
-offset_left = 390.0
-offset_top = 45.0
-offset_right = 1210.0
-offset_bottom = 855.0
+anchors_preset = 15
+anchor_left = 0.22
+anchor_top = 0.05
+anchor_right = 0.78
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
 [node name="Title" type="Label" parent="Panel"]
 layout_mode = 2
-text = "장사의신 사옥 · 재무"
+text = "회사 재무"
 horizontal_alignment = 1
 [node name="Personal" type="Label" parent="Panel"]
 layout_mode = 2
-text = "개인 계좌"
+text = "개인 잔액"
 [node name="Corporate" type="Label" parent="Panel"]
 layout_mode = 2
-text = "법인 계좌"
+text = "법인 잔액"
 [node name="Capital" type="Label" parent="Panel"]
 layout_mode = 2
-text = "출자 원금 · 실현이익"
+text = "출자 원금 · 누적 이익"
 [node name="OfficeStatus" type="Label" parent="Panel"]
 layout_mode = 2
 text = "사옥 종류 · 정원"
@@ -58,24 +61,28 @@ text = "일반 대출 실행"
 layout_mode = 2
 [node name="Ledger" type="Label" parent="Panel"]
 layout_mode = 2
-text = "최근 원장"
+text = "최근 내역"
+[node name="AmountLabel" type="Label" parent="Panel"]
+layout_mode = 2
+text = "처리 금액"
 [node name="Amount" type="SpinBox" parent="Panel"]
 layout_mode = 2
+tooltip_text = "출자·인출·대출·상환에 사용할 금액"
 min_value = 1.0
 max_value = 100000000.0
 value = 10000.0
 [node name="Contribute" type="Button" parent="Panel"]
 layout_mode = 2
-text = "개인 자금 출자"
+text = "법인에 출자"
 [node name="Return" type="Button" parent="Panel"]
 layout_mode = 2
-text = "출자 원금 반환"
+text = "출자금 반환"
 [node name="WithdrawProfit" type="Button" parent="Panel"]
 layout_mode = 2
-text = "실현이익 인출"
+text = "이익 인출"
 [node name="Message" type="Label" parent="Panel"]
 layout_mode = 2
-text = "법인은 반환 뒤 다음 월 고정비를 남겨야 합니다."
+text = "월 고정비를 고려해 출금할 수 있습니다."
 [node name="Exit" type="Button" parent="Panel"]
 layout_mode = 2
 text = "나가기"

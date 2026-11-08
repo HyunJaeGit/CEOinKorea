@@ -228,7 +228,7 @@ func _reset_phase3_state() -> void:
 	game_clock.processed_through_day = GameClockScript.get_day_start_timestamp(_date_to_timestamp("2025-01-20"))
 	pause_reasons.clear()
 	var initial_assignment := "companion" if party_ids.has("staff_01") else "office_standby"
-	employee_states = {"staff_01": {"assignment": initial_assignment, "last_task_id": ""}}
+	employee_states = {"staff_01": {"assignment": initial_assignment, "last_task_id": "", "level": 1, "cargo_capacity_g": PERSON_CAPACITY_G}}
 	staff_tasks.clear()
 	market_reports.clear()
 	event_states.clear()
@@ -434,7 +434,10 @@ func _complete_research_tasks(day_timestamp: int) -> void:
 		task["status"] = "completed"
 		task["report_id"] = report["id"]
 		staff_tasks[task_id] = task
-		employee_states[task["employee_id"]] = {"assignment": "office_standby", "last_task_id": str(task_id)}
+		var employee_state: Dictionary = employee_states.get(str(task["employee_id"]), {}).duplicate(true)
+		employee_state["assignment"] = "office_standby"
+		employee_state["last_task_id"] = str(task_id)
+		employee_states[task["employee_id"]] = employee_state
 		_add_daily_alert("시장 조사 보고 도착: %s" % report["region_name"])
 
 
@@ -589,7 +592,10 @@ func assign_research(task_id: String, destination_region: String, companion_unas
 	var completion_day: int = int(game_clock.processed_through_day) + duration_days * 86400
 	staff_tasks[task_id] = {"id": task_id, "employee_id": employee_id, "destination_region": destination_region,
 		"departure_date": get_game_date_string(), "completion_day": completion_day, "cost": cost, "status": "in_progress", "report_id": ""}
-	employee_states[employee_id] = {"assignment": "research_trip", "last_task_id": task_id}
+	var employee_state: Dictionary = employee_states.get(employee_id, {}).duplicate(true)
+	employee_state["assignment"] = "research_trip"
+	employee_state["last_task_id"] = task_id
+	employee_states[employee_id] = employee_state
 	processed_order_ids.append(task_id)
 	ledger.append({"id": task_id, "kind": "market_research_trip", "account": "corporate", "amount": -cost, "region_id": destination_region, "duration_days": duration_days, "date": get_game_date_string()})
 	if not save_game():
@@ -606,7 +612,10 @@ func cancel_research(task_id: String) -> Dictionary:
 	var task: Dictionary = staff_tasks[task_id]
 	task["status"] = "cancelled"
 	staff_tasks[task_id] = task
-	employee_states[task["employee_id"]] = {"assignment": "office_standby", "last_task_id": task_id}
+	var employee_state: Dictionary = employee_states.get(str(task["employee_id"]), {}).duplicate(true)
+	employee_state["assignment"] = "office_standby"
+	employee_state["last_task_id"] = task_id
+	employee_states[task["employee_id"]] = employee_state
 	if not save_game():
 		_apply_payload(previous_state)
 		return {"ok": false, "reason": "save_failed"}
@@ -621,7 +630,9 @@ func return_staff_to_companion(employee_id: String) -> Dictionary:
 		return {"ok": false, "reason": "party_full"}
 	var previous_state := _make_payload()
 	party_ids.append(employee_id)
-	employee_states[employee_id] = {"assignment": "companion", "last_task_id": employee_states[employee_id].get("last_task_id", "")}
+	var employee_state: Dictionary = employee_states[employee_id].duplicate(true)
+	employee_state["assignment"] = "companion"
+	employee_states[employee_id] = employee_state
 	if not save_game():
 		_apply_payload(previous_state)
 		return {"ok": false, "reason": "save_failed"}
@@ -699,6 +710,36 @@ func get_inventory_weight_g(person_id: String) -> int:
 	var total := 0
 	for product_id in inventories.get(person_id, {}):
 		total += int(inventories[person_id][product_id]) * int(products.get(product_id, {}).get("unit_weight_g", 0))
+	return total
+
+
+## 인물별 적재 능력치를 읽고 구버전 직원 데이터는 기획 기본값으로 보완한다.
+func get_cargo_capacity_g(owner_id: String) -> int:
+	if owner_id.begins_with("vehicle:"):
+		var vehicle_id := owner_id.trim_prefix("vehicle:")
+		return int(vehicle_definitions.get(vehicle_id, {}).get("capacity_g", 0))
+	if owner_id == "player":
+		return PERSON_CAPACITY_G
+	return int(employee_states.get(owner_id, {}).get("cargo_capacity_g", PERSON_CAPACITY_G))
+
+
+## 현재 야외에서 함께 움직이는 인물과 활성 차량의 거래 화물 무게를 합산한다.
+func get_moving_trade_cargo_weight_g() -> int:
+	var total := 0
+	for person_id in party_ids:
+		total += get_inventory_weight_g(person_id)
+	if not active_vehicle_id.is_empty():
+		total += get_inventory_weight_g("vehicle:" + active_vehicle_id)
+	return total
+
+
+## 현재 이동 편성의 총 적재 가능량을 반환해 차량 비용의 적재 비율을 계산한다.
+func get_moving_cargo_capacity_g() -> int:
+	var total := 0
+	for person_id in party_ids:
+		total += get_cargo_capacity_g(person_id)
+	if not active_vehicle_id.is_empty():
+		total += get_cargo_capacity_g("vehicle:" + active_vehicle_id)
 	return total
 
 
@@ -860,10 +901,7 @@ func _is_cargo_owner_available(owner_id: String) -> bool:
 
 
 func _cargo_capacity_g(owner_id: String) -> int:
-	if owner_id.begins_with("vehicle:"):
-		var vehicle_id := owner_id.trim_prefix("vehicle:")
-		return int(vehicle_definitions.get(vehicle_id, {}).get("capacity_g", 0))	
-	return PERSON_CAPACITY_G
+	return get_cargo_capacity_g(owner_id)
 
 
 func get_owner_weight_g(owner_id: String) -> int:
@@ -921,8 +959,15 @@ func select_vehicle(vehicle_id: String) -> Dictionary:
 func charge_vehicle_distance(distance_m: float) -> Dictionary:
 	if active_vehicle_id.is_empty() or distance_m <= 0.0:
 		return {"ok": true, "charged": 0}
+	var cargo_weight_g := get_moving_trade_cargo_weight_g()
+	if cargo_weight_g <= 0:
+		return {"ok": true, "charged": 0, "reason": "empty_cargo"}
 	var vehicle: Dictionary = vehicle_definitions[active_vehicle_id]
-	var exact_cost := distance_m * float(vehicle["cost_per_km"]) / 1000.0 + float(vehicle_cost_remainders.get(active_vehicle_id, 0.0))
+	var capacity_g := get_moving_cargo_capacity_g()
+	if capacity_g <= 0:
+		return {"ok": false, "reason": "invalid_capacity"}
+	var load_ratio := clampf(float(cargo_weight_g) / float(capacity_g), 0.0, 1.0)
+	var exact_cost := distance_m * float(vehicle["cost_per_km"]) / 1000.0 * load_ratio + float(vehicle_cost_remainders.get(active_vehicle_id, 0.0))
 	var charge := floori(exact_cost)
 	if charge > int(accounts["corporate"]):
 		return {"ok": false, "reason": "insufficient_funds", "needed": charge, "available": int(accounts["corporate"])}
@@ -1548,7 +1593,7 @@ func hire_employee(operation_id: String, role: String = "general") -> Dictionary
 	var previous := _make_payload()
 	staff_counter += 1
 	var employee_id := "staff_%02d" % staff_counter
-	employee_states[employee_id] = {"assignment": "office_standby", "last_task_id": "", "role": role}
+	employee_states[employee_id] = {"assignment": "office_standby", "last_task_id": "", "role": role, "level": 1, "cargo_capacity_g": PERSON_CAPACITY_G}
 	inventories[employee_id] = {}
 	inventory_costs[employee_id] = {}
 	processed_order_ids.append(operation_id)
@@ -1797,8 +1842,13 @@ func _validate_payload(payload: Dictionary) -> bool:
 		var saved_weight := 0
 		for product_id in saved_inventory[person_id]:
 			saved_weight += int(saved_inventory[person_id][product_id]) * int(products[product_id]["unit_weight_g"])
-		if saved_weight > PERSON_CAPACITY_G:
-			return false
+		if not str(person_id).begins_with("vehicle:"):
+			var saved_capacity := PERSON_CAPACITY_G
+			var saved_employees: Variant = payload.get("employee_states", {})
+			if person_id != "player" and saved_employees is Dictionary and saved_employees.get(person_id, {}) is Dictionary:
+				saved_capacity = int(saved_employees.get(person_id, {}).get("cargo_capacity_g", PERSON_CAPACITY_G))
+			if saved_capacity <= 0 or saved_weight > saved_capacity:
+				return false
 	for entry in saved_ledger:
 		if not entry is Dictionary or not entry.has("id"):
 			return false
@@ -2008,6 +2058,8 @@ func _add_phase5_defaults(payload: Dictionary) -> void:
 		if not employees[employee_id] is Dictionary: continue
 		var employee: Dictionary = employees[employee_id]
 		employee["role"] = str(employee.get("role", "general"))
+		employee["level"] = maxi(1, int(employee.get("level", 1)))
+		employee["cargo_capacity_g"] = maxi(1, int(employee.get("cargo_capacity_g", PERSON_CAPACITY_G)))
 		employees[employee_id] = employee
 		var suffix := str(employee_id).trim_prefix("staff_")
 		if suffix.is_valid_int(): counter = maxi(counter, int(suffix))

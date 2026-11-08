@@ -1,6 +1,28 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=8 format=3]
+
 [ext_resource type="Script" path="res://game/city_hall/city_hall.gd" id="1_script"]
 [ext_resource type="Theme" path="res://game/ui/game_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/city_hall_seoul_bg.png" id="3_seoul"]
+[ext_resource type="Texture2D" path="res://assets/city_hall_incheon_bg.png" id="4_incheon"]
+[ext_resource type="Texture2D" path="res://assets/city_hall_suwon_bg.png" id="5_suwon"]
+[ext_resource type="Texture2D" path="res://assets/city_hall_cheonan_bg.png" id="6_cheonan"]
+
+[sub_resource type="StyleBoxFlat" id="Card"]
+bg_color = Color(0.94, 0.94, 0.84, 0.93)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.42, 0.56, 0.42, 0.95)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+
 [node name="CityHall" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -10,94 +32,221 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 theme = ExtResource("2_theme")
-[node name="Backdrop" type="ColorRect" parent="."]
+
+[node name="Backdrop" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.83, 0.88, 0.77, 1)
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_seoul")
+expand_mode = 1
+stretch_mode = 6
 mouse_filter = 2
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.13, 0.18, 0.15, 0.24)
+mouse_filter = 2
+
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 45.0
-offset_top = 35.0
-offset_right = -45.0
-offset_bottom = -35.0
+offset_left = 42.0
+offset_top = 30.0
+offset_right = -42.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
 [node name="Columns" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-[node name="Title" type="Label" parent="Margin/Columns"]
+theme_override_constants/separation = 12
+
+[node name="Header" type="PanelContainer" parent="Margin/Columns"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("Card")
+
+[node name="HeaderRows" type="VBoxContainer" parent="Margin/Columns/Header"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/Columns/Header/HeaderRows"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "시청"
-[node name="RegionInfo" type="Label" parent="Margin/Columns"]
+
+[node name="RegionInfo" type="Label" parent="Margin/Columns/Header/HeaderRows"]
 layout_mode = 2
 text = "지역 정보"
-[node name="Accounts" type="Label" parent="Margin/Columns"]
+
+[node name="Flow" type="Label" parent="Margin/Columns/Header/HeaderRows"]
 layout_mode = 2
-text = "계좌"
+theme_override_colors/font_color = Color(0.34, 0.48, 0.35, 1)
+theme_override_font_sizes/font_size = 16
+text = "장터 둘러보기  ›  시장 선택"
+
+[node name="Accounts" type="Label" parent="Margin/Columns/Header/HeaderRows"]
+layout_mode = 2
+text = "개인 0원 · 법인 0원"
+
 [node name="Body" type="HBoxContainer" parent="Margin/Columns"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 24
-[node name="Markets" type="VBoxContainer" parent="Margin/Columns/Body"]
+theme_override_constants/separation = 12
+
+[node name="Markets" type="PanelContainer" parent="Margin/Columns/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.0
-[node name="Heading" type="Label" parent="Margin/Columns/Body/Markets"]
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("Card")
+
+[node name="Content" type="VBoxContainer" parent="Margin/Columns/Body/Markets"]
 layout_mode = 2
-text = "지역 시장"
-[node name="MarketList" type="VBoxContainer" parent="Margin/Columns/Body/Markets"]
+theme_override_constants/separation = 8
+
+[node name="Heading" type="Label" parent="Margin/Columns/Body/Markets/Content"]
 layout_mode = 2
-[node name="Products" type="VBoxContainer" parent="Margin/Columns/Body"]
+theme_override_font_sizes/font_size = 18
+text = "오늘의 장터"
+
+[node name="MarketHint" type="Label" parent="Margin/Columns/Body/Markets/Content"]
+layout_mode = 2
+text = "시장을 선택하세요"
+
+[node name="MarketScroll" type="ScrollContainer" parent="Margin/Columns/Body/Markets/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="MarketList" type="GridContainer" parent="Margin/Columns/Body/Markets/Content/MarketScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.0
-[node name="Heading" type="Label" parent="Margin/Columns/Body/Products"]
-layout_mode = 2
-text = "취급 상품"
-[node name="ProductList" type="VBoxContainer" parent="Margin/Columns/Body/Products"]
-layout_mode = 2
-[node name="Order" type="VBoxContainer" parent="Margin/Columns/Body"]
+columns = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[node name="Products" type="PanelContainer" parent="Margin/Columns/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 2.0
-[node name="Heading" type="Label" parent="Margin/Columns/Body/Order"]
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("Card")
+
+[node name="Content" type="VBoxContainer" parent="Margin/Columns/Body/Products"]
 layout_mode = 2
-text = "주문 확인"
-[node name="Direction" type="OptionButton" parent="Margin/Columns/Body/Order"]
+theme_override_constants/separation = 8
+
+[node name="Heading" type="Label" parent="Margin/Columns/Body/Products/Content"]
 layout_mode = 2
-[node name="Owner" type="OptionButton" parent="Margin/Columns/Body/Order"]
+theme_override_font_sizes/font_size = 18
+text = "진열 상품"
+
+[node name="ProductHint" type="Label" parent="Margin/Columns/Body/Products/Content"]
 layout_mode = 2
-[node name="Quantity" type="SpinBox" parent="Margin/Columns/Body/Order"]
+text = "시장을 먼저 골라주세요"
+
+[node name="ProductScroll" type="ScrollContainer" parent="Margin/Columns/Body/Products/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ProductList" type="GridContainer" parent="Margin/Columns/Body/Products/Content/ProductScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="Order" type="PanelContainer" parent="Margin/Columns/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("Card")
+
+[node name="Content" type="VBoxContainer" parent="Margin/Columns/Body/Order"]
+layout_mode = 2
+theme_override_constants/separation = 7
+
+[node name="Heading" type="Label" parent="Margin/Columns/Body/Order/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "거래 준비"
+
+[node name="Direction" type="OptionButton" parent="Margin/Columns/Body/Order/Content"]
+layout_mode = 2
+
+[node name="Owner" type="OptionButton" parent="Margin/Columns/Body/Order/Content"]
+layout_mode = 2
+
+[node name="Quantity" type="SpinBox" parent="Margin/Columns/Body/Order/Content"]
 layout_mode = 2
 min_value = 1.0
 max_value = 40.0
 value = 1.0
-[node name="Quote" type="Label" parent="Margin/Columns/Body/Order"]
+
+[node name="Quote" type="Label" parent="Margin/Columns/Body/Order/Content"]
+custom_minimum_size = Vector2(0, 88)
 layout_mode = 2
-text = "견적"
+size_flags_vertical = 3
+text = "시장과 상품을 순서대로 골라주세요."
 autowrap_mode = 3
-[node name="Confirm" type="Button" parent="Margin/Columns/Body/Order"]
+vertical_alignment = 1
+
+[node name="Result" type="Label" parent="Margin/Columns/Body/Order/Content"]
 layout_mode = 2
-text = "확정"
-[node name="Cancel" type="Button" parent="Margin/Columns/Body/Order"]
-layout_mode = 2
-text = "취소"
-[node name="Transfer" type="Button" parent="Margin/Columns/Body/Order"]
-layout_mode = 2
-text = "다른 동행 인물/차량에 이전"
-[node name="Cache" type="Button" parent="Margin/Columns/Body/Order"]
-layout_mode = 2
-text = "현지 임시 보관"
-[node name="Result" type="Label" parent="Margin/Columns/Body/Order"]
-layout_mode = 2
-autowrap_mode = 3
 text = ""
-[node name="Workshop" type="Button" parent="Margin/Columns"]
+autowrap_mode = 3
+
+[node name="TradeActions" type="HBoxContainer" parent="Margin/Columns/Body/Order/Content"]
 layout_mode = 2
-text = "작업장 · 같은 패 연결 제거"
-[node name="Exit" type="Button" parent="Margin/Columns"]
+theme_override_constants/separation = 8
+
+[node name="Confirm" type="Button" parent="Margin/Columns/Body/Order/Content/TradeActions"]
 layout_mode = 2
+size_flags_horizontal = 3
+text = "주문 확정"
+
+[node name="Cancel" type="Button" parent="Margin/Columns/Body/Order/Content/TradeActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "주문 취소"
+
+[node name="CargoActions" type="HBoxContainer" parent="Margin/Columns/Body/Order/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Transfer" type="Button" parent="Margin/Columns/Body/Order/Content/CargoActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "화물 옮기기"
+
+[node name="Cache" type="Button" parent="Margin/Columns/Body/Order/Content/CargoActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "현지에 맡기기"
+
+[node name="Footer" type="HBoxContainer" parent="Margin/Columns"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Workshop" type="Button" parent="Margin/Columns/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "작업장"
+
+[node name="Exit" type="Button" parent="Margin/Columns/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "나가기"

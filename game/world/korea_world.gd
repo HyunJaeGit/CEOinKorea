@@ -2,7 +2,6 @@
 extends Node2D
 const MAP_RECT := Rect2(100.0, 70.0, 1700.0, 820.0)
 const INTERACTION_DISTANCE := 190.0
-const GAME_THEME := preload("res://game/ui/game_theme.tres")
 const ENEMY_ACTOR_SCRIPT := preload("res://game/world/enemy/enemy_actor.gd")
 const ENTRANCE_PATHS: Array[NodePath] = [
 	NodePath("WorldObjects/SeoulOffice/Entrance"),
@@ -19,9 +18,10 @@ var region_id: String
 var entrance_nodes: Array[Area2D] = []
 var selected_entrance: Area2D
 var hovered_entrance: Area2D
+var hovered_region_label: Label
 var reference_route_length := 0.0
 var position_sync_seconds := 0.0
-const SAFE_ROUTE_SECONDS := 22.5
+const SAFE_ROUTE_SECONDS := 11.25
 const SAFE_ROUTE_METERS := 30000
 const BRIDGE_RECT := Rect2(610, 375, 210, 85)
 
@@ -53,6 +53,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if interaction_panel.visible:
 		_set_hovered_entrance(null)
+		_set_hovered_region_label(null)
 		return
 	_update_building_hover()
 	if is_instance_valid(player.pending_entrance):
@@ -72,7 +73,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				if recovery.ok:
 					parked_vehicle.queue_free()
 					_update_vehicle_speed()
-					status_label.text = "차량을 회수했습니다. 이동 거리에 따라 법인 비용이 발생합니다."
+					status_label.text = "차량을 회수했습니다. 거래 화물이 실려 있을 때만 이동 비용이 발생합니다."
 				else:
 					status_label.text = "차량 회수 불가: %s" % recovery.get("reason", "확인 필요")
 				return
@@ -150,7 +151,7 @@ func _add_solid(points: PackedVector2Array) -> void:
 	body.add_child(shape)
 	$Map.add_child(body)
 
-## 기준 경로 길이는 환산 30km로 유지하고 현재 기본 속도는 22.5초 목표에 맞춘다.
+## 기준 경로 길이는 환산 30km로 유지하고 현재 기본 속도는 11.25초 목표에 맞춘다.
 func _finish_navigation_setup() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -190,7 +191,7 @@ func _finish_navigation_setup() -> void:
 	player.navigation_ready = true
 	_spawn_encounter_enemies()
 	GameSession.update_world_state(region_id, player.global_position)
-	_interaction_log("navigation_ready length=%.2f speed=%.2f reference_km=30 seconds=22.5" % [reference_route_length, player.move_speed])
+	_interaction_log("navigation_ready length=%.2f speed=%.2f reference_km=30 seconds=11.25" % [reference_route_length, player.move_speed])
 	if OS.get_cmdline_user_args().has("--phase5-map-tests"):
 		var route_checks_ok := true
 		for region_key in ["seoul", "incheon", "suwon", "cheonan"]:
@@ -203,7 +204,7 @@ func _finish_navigation_setup() -> void:
 		get_tree().quit(0 if route_checks_ok else 1)
 
 
-## 실제 이동 프레임의 거리만 논리 m로 환산해 차량 비용을 정산한다.
+## 실제 이동 프레임의 거리와 거래 화물 적재 비율로 차량 비용을 정산한다.
 func _on_player_moved_distance(distance_px: float, from_position: Vector2, to_position: Vector2) -> void:
 	if GameSession.active_vehicle_id.is_empty() or reference_route_length <= 0.0:
 		return
@@ -369,11 +370,15 @@ func _building_at(world_point: Vector2) -> Area2D:
 			return entrance
 	return null
 
-## 건물 이미지 바깥에 금색 실루엣을 만들어 hover 상태를 표시한다.
+## 건물 hover 테두리를 준비하고 건물명은 포인터가 올라올 때만 보여준다.
 func _prepare_hover_highlight(entrance: Area2D) -> void:
 	var building := entrance.get_parent().get_node_or_null("Building") as Sprite2D
 	if building == null:
 		return
+	var building_label := entrance.get_parent().get_node_or_null("Label") as Label
+	if building_label != null:
+		building_label.visible = false
+		entrance.set_meta("hover_label", building_label)
 	var highlight := Sprite2D.new()
 	highlight.name = "HoverHighlight"
 	highlight.texture = building.texture
@@ -391,26 +396,21 @@ func _prepare_hover_highlight(entrance: Area2D) -> void:
 	highlight.visible = false
 	building.get_parent().add_child(highlight)
 	entrance.set_meta("hover_highlight", highlight)
-	var visit_button := Button.new()
-	visit_button.name = "VisitPrompt"
-	visit_button.text = "%s 방문" % entrance.get_meta("label")
-	visit_button.theme = GAME_THEME
-	visit_button.position = Vector2(-84.0, -148.0)
-	visit_button.size = Vector2(168.0, 42.0)
-	visit_button.z_index = 16
-	visit_button.mouse_filter = Control.MOUSE_FILTER_STOP
-	visit_button.focus_mode = Control.FOCUS_NONE
-	visit_button.pressed.connect(_on_visit_button_pressed.bind(entrance))
-	building.get_parent().add_child(visit_button)
-	entrance.set_meta("visit_button", visit_button)
-	_interaction_log("visit_button_ready=%s visible=%s position=%s" % [visit_button.text, visit_button.visible, visit_button.position])
 
 ## 건물 그림 위에서 포인터와 금색 외곽 표시를 전환한다.
 func _update_building_hover() -> void:
 	if get_viewport().gui_get_hovered_control() != null:
 		_set_hovered_entrance(null)
+		_set_hovered_region_label(null)
 		return
-	_set_hovered_entrance(_building_at(get_global_mouse_position()))
+	var world_point := get_global_mouse_position()
+	var building := _building_at(world_point)
+	if building != null:
+		_set_hovered_entrance(building)
+		_set_hovered_region_label(null)
+	else:
+		_set_hovered_entrance(null)
+		_set_hovered_region_label(_region_label_at(world_point))
 
 func _set_hovered_entrance(entrance: Area2D) -> void:
 	var previous_name := str(hovered_entrance.get_meta("label")) if is_instance_valid(hovered_entrance) else "none"
@@ -421,14 +421,38 @@ func _set_hovered_entrance(entrance: Area2D) -> void:
 		var previous: Variant = hovered_entrance.get_meta("hover_highlight", null)
 		if is_instance_valid(previous):
 			previous.visible = false
+		var previous_label: Variant = hovered_entrance.get_meta("hover_label", null)
+		if is_instance_valid(previous_label):
+			previous_label.visible = false
 	hovered_entrance = entrance
 	if is_instance_valid(hovered_entrance):
 		var highlight: Variant = hovered_entrance.get_meta("hover_highlight", null)
 		if is_instance_valid(highlight):
 			highlight.visible = true
+		var building_label: Variant = hovered_entrance.get_meta("hover_label", null)
+		if is_instance_valid(building_label):
+			building_label.visible = true
 		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
 	else:
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+## 지역 지형 위에서만 지역명을 표시하고 UI 입력은 가로채지 않는다.
+func _region_label_at(world_point: Vector2) -> Label:
+	for marker_path in ["Map/SeoulTown", "Map/IncheonHarbor", "Map/SuwonTown", "Map/CheonanTown"]:
+		var marker := get_node_or_null(marker_path) as Polygon2D
+		if marker == null:
+			continue
+		if Geometry2D.is_point_in_polygon(marker.to_local(world_point), marker.polygon):
+			return marker.get_node_or_null("Label") as Label
+	return null
+
+## 현재 표시 중인 지역 라벨을 교체하거나 숨긴다.
+func _set_hovered_region_label(label: Label) -> void:
+	if is_instance_valid(hovered_region_label) and hovered_region_label != label:
+		hovered_region_label.visible = false
+	hovered_region_label = label
+	if is_instance_valid(hovered_region_label):
+		hovered_region_label.visible = true
 
 func _select_entrance(entrance: Area2D) -> void:
 	if not is_instance_valid(entrance):
@@ -457,10 +481,6 @@ func _open_interaction_menu(entrance: Area2D) -> void:
 	interaction_panel.visible = true
 	status_label.text = "%s · 메뉴에서 상호작용을 선택하세요" % label
 	_interaction_log("menu_open=%s visible=%s" % [label, interaction_panel.visible])
-
-func _on_visit_button_pressed(entrance: Area2D) -> void:
-	_interaction_log("visit_button_pressed=%s" % entrance.get_meta("label"))
-	_select_entrance(entrance)
 
 func _enter_selected_building() -> void:
 	if not is_instance_valid(selected_entrance):
@@ -508,6 +528,8 @@ func _build_map_details() -> void:
 	cheonan.name = "Cheonan"
 	details.add_child(cheonan)
 	_add_map_polygon(seoul, "HangangPark", Vector2(455, 280), PackedVector2Array([Vector2(-120, 10), Vector2(35, -65), Vector2(155, -5), Vector2(90, 105), Vector2(-55, 120)]), Color("657b56"), 1)
+	_add_map_polygon(seoul, "BukhansanRidge", Vector2(1055, 150), PackedVector2Array([Vector2(-130, 70), Vector2(-95, 5), Vector2(-48, 20), Vector2(5, -65), Vector2(46, 4), Vector2(92, -20), Vector2(143, 70), Vector2(80, 103), Vector2(-42, 100)]), Color("71816a"), 1)
+	_add_map_polygon(seoul, "BukhansanLightSlope", Vector2(1055, 150), PackedVector2Array([Vector2(-48, 20), Vector2(5, -65), Vector2(46, 4), Vector2(12, -5), Vector2(-5, 22)]), Color("a4a984"), 2)
 	_add_map_polygon(seoul, "CentralDistrict", Vector2(1090, 285), PackedVector2Array([Vector2(-125, 8), Vector2(-45, -68), Vector2(98, -42), Vector2(125, 48), Vector2(32, 95), Vector2(-95, 72)]), Color("526b59"), 1)
 	_add_map_polygon(seoul, "EastDistrict", Vector2(1450, 465), PackedVector2Array([Vector2(-90, -45), Vector2(25, -75), Vector2(112, -12), Vector2(72, 67), Vector2(-52, 74)]), Color("58705a"), 1)
 	_add_tree_cluster(seoul, "ParkTreesA", Vector2(405, 300), 7)
@@ -523,12 +545,16 @@ func _build_map_details() -> void:
 	_add_map_line(seoul, "BridgeSurface", bridge_points, 29.0, Color("b9a278"), 3)
 	_add_map_line(seoul, "BridgeMarking", bridge_points, 3.0, Color("e1d2ad"), 4)
 	_add_map_polygon(incheon, "PortApron", Vector2(240, 515), PackedVector2Array([Vector2(-115, 0), Vector2(5, -48), Vector2(130, -5), Vector2(95, 74), Vector2(-70, 96)]), Color("4e6962"), 1)
+	_add_map_polygon(incheon, "WestSeaInlet", Vector2(65, 500), PackedVector2Array([Vector2(-140, -70), Vector2(32, -112), Vector2(128, -36), Vector2(95, 30), Vector2(140, 110), Vector2(20, 155), Vector2(-125, 88)]), Color("3d7181"), 0)
+	_add_map_polygon(incheon, "TidalFlat", Vector2(180, 620), PackedVector2Array([Vector2(-90, -12), Vector2(38, -56), Vector2(152, -4), Vector2(110, 58), Vector2(-35, 75)]), Color("78958a"), 1)
 	_add_map_polygon(incheon, "PortWarehouseA", Vector2(205, 475), PackedVector2Array([Vector2(-44, 0), Vector2(-18, -30), Vector2(42, -18), Vector2(48, 18), Vector2(-12, 34)]), Color("7c7867"), 2)
 	_add_map_polygon(incheon, "PortWarehouseB", Vector2(315, 505), PackedVector2Array([Vector2(-38, 2), Vector2(-12, -28), Vector2(42, -12), Vector2(46, 20), Vector2(-8, 34)]), Color("89816d"), 2)
 	_add_map_line(incheon, "PierWest", PackedVector2Array([Vector2(135, 560), Vector2(90, 605), Vector2(25, 625)]), 9.0, Color("786b55"), 4)
 	_add_map_line(incheon, "PierEast", PackedVector2Array([Vector2(285, 585), Vector2(350, 625), Vector2(405, 676)]), 9.0, Color("786b55"), 4)
 	_add_map_line(incheon, "HallRoad", PackedVector2Array([Vector2(360, 720), Vector2(408, 752), Vector2(450, 780)]), 13.0, Color("786a54"), 2)
 	_add_map_polygon(suwon, "IndustrialQuarter", Vector2(1330, 310), PackedVector2Array([Vector2(-95, 0), Vector2(-45, -58), Vector2(65, -46), Vector2(112, 5), Vector2(48, 74), Vector2(-72, 58)]), Color("657663"), 1)
+	_add_map_polygon(suwon, "GwanggyoHill", Vector2(1535, 315), PackedVector2Array([Vector2(-105, 42), Vector2(-75, -20), Vector2(-25, -68), Vector2(24, -10), Vector2(71, -42), Vector2(118, 44), Vector2(40, 80), Vector2(-44, 77)]), Color("71836c"), 1)
+	_add_map_line(suwon, "HwaseongRampart", PackedVector2Array([Vector2(1350, 373), Vector2(1370, 350), Vector2(1412, 344), Vector2(1450, 362), Vector2(1462, 393), Vector2(1435, 414), Vector2(1390, 412), Vector2(1350, 373)]), 5.0, Color("c3ae82"), 3)
 	_add_neighborhood_building(suwon, "FactoryA", Vector2(1320, 305), Color("a89a79"))
 	_add_neighborhood_building(suwon, "FactoryB", Vector2(1405, 335), Color("b2a27d"))
 	_add_map_polygon(cheonan, "FarmFields", Vector2(1015, 700), PackedVector2Array([Vector2(-115, 0), Vector2(-60, -58), Vector2(60, -50), Vector2(130, 15), Vector2(80, 82), Vector2(-65, 65)]), Color("829065"), 1)
@@ -612,9 +638,9 @@ func _update_hud() -> void:
 	var current_index := region_ids.find(region_id)
 	var next_region := str(region_ids[(current_index + 1) % region_ids.size()]) if not region_ids.is_empty() else region_id
 	var next_name := str(GameSession.region_definitions.get(next_region, {}).get("name", next_region))
-	status_label.text = "%s · 방향키 이동 / 지면·건물 클릭" % region_name
+	status_label.text = "%s · 방향키 또는 지면 클릭" % region_name
 	region_button.text = "%s시청까지 걷기" % next_name
-	$UI/BottomBar/Hint.text = "방향키 / 지면 클릭 · 목적지까지 실제 도보 이동 · 도로는 내비게이션 경로"
+	$UI/BottomBar/Hint.text = "방향키 이동  ·  지면 클릭 이동  ·  건물 클릭 후 방문"
 
 ## F5 디버그 실행에서 건물 상호작용 경로를 Output 패널에 기록한다.
 func _interaction_log(message: String) -> void:

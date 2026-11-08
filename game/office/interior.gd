@@ -28,10 +28,13 @@ func _ready() -> void:
 	$FinanceScreen.closed.connect(_close_finance)
 	$Panel/Meeting.pressed.connect(_open_meeting)
 	$Panel/Exit.pressed.connect(SceneRouter.exit_building)
+	$Panel/Meeting.text = "회의 · 도착 보고 %d" % GameSession.market_reports.size()
+	$Panel/Meeting.disabled = GameSession.market_reports.is_empty()
 	$InteractionMenu/Rows/Close.pressed.connect(_close_object_menu)
 	$NewsArchive.closed.connect(_close_archive)
 	GameSession.state_changed.connect(_refresh_staff)
 	GameSession.reports_changed.connect(_refresh_staff)
+	GameSession.reports_changed.connect(_refresh_meeting_button)
 	_refresh_staff()
 
 func _open_finance() -> void:
@@ -68,9 +71,9 @@ func _on_hotspot_hover(object_id: String, entered: bool) -> void:
 			$Panel/HintCard/Hint.text = "노트북 · 비서 · 전화기에 마우스를 올려보세요"
 		return
 	var hints := {
-		"laptop": "노트북 · 시장 조사, 보고, 기사, 재무",
-		"secretary": "비서 · 직원 상태와 동행 업무",
-		"phone": "전화기 · 담당 직원에게 연락",
+		"laptop": "노트북 · 조사 · 보고 · 재무",
+		"secretary": "비서 · 직원 관리",
+		"phone": "전화기 · 직원 연락",
 	}
 	$Panel/HintCard/Hint.text = str(hints.get(object_id, "오브젝트 선택"))
 
@@ -87,25 +90,26 @@ func _open_object_menu(object_id: String) -> void:
 	match object_id:
 		"laptop":
 			title.text = "노트북 업무"
-			description.text = "컴퓨터에서 진행할 업무를 선택하세요."
+			description.text = "시장 정보를 살피고 회사 운영을 관리합니다."
+			_add_menu_section(actions, "시장 정보")
 			_add_menu_action(actions, "시장 조사 지시", _select_survey, GameSession.employee_states.get("staff_01", {}).get("assignment", "") == "research_trip")
-			_add_menu_action(actions, "조사 보고", _select_reports)
-			_add_menu_action(actions, "뉴스 기사 보관", _select_archive)
+			_add_menu_action(actions, "뉴스 보관함", _select_archive)
+			_add_menu_section(actions, "회사 운영")
 			_add_menu_action(actions, "재무 · 계좌", _select_finance)
-			_add_menu_action(actions, "인터넷 · 차량 구매/선택", _select_vehicle_shop)
+			_add_menu_action(actions, "차량 구매", _select_vehicle_shop)
 		"phone":
-			title.text = "전화기"
-			description.text = "직원의 연락 가능 상태와 최근 보고 수를 확인합니다."
-			_add_menu_action(actions, "직원 연락 상태 확인", _phone)
+			title.text = "전화 연결"
+			description.text = "출장 중인 직원에게도 연락할 수 있습니다."
+			_add_menu_action(actions, "직원에게 연락하기", _phone)
 		"secretary":
 			title.text = "비서 · 직원 업무"
 			var state: Dictionary = GameSession.employee_states.get("staff_01", {})
 			var assignment := str(state.get("assignment", "office_standby"))
-			description.text = "직원 상태: %s · 조사 보고 %d건" % [_assignment_name(assignment), GameSession.market_reports.size()]
+			description.text = "직원 배치와 용병단을 관리합니다."
 			if assignment == "office_standby":
 				_add_menu_action(actions, "야외 동행으로 합류", _staff_action, GameSession.party_ids.size() >= 4)
 			elif assignment == "research_trip":
-				_add_menu_action(actions, "조사 출장 취소 · 비용 환불 없음", _cancel_task)
+				_add_menu_action(actions, "출장 취소 · 비용 반환 없음", _cancel_task)
 			else:
 				description.text += "\n현재 야외 동행 중입니다."
 			_add_menu_action(actions, "용병 고용 · 치료", _select_mercenary_management)
@@ -120,6 +124,15 @@ func _add_menu_action(actions: VBoxContainer, label_text: String, callback: Call
 	button.pressed.connect(callback)
 	actions.add_child(button)
 
+
+## 메뉴 기능을 업무 주제별로 묶어 한눈에 찾게 한다.
+func _add_menu_section(actions: VBoxContainer, label_text: String) -> void:
+	var label := Label.new()
+	label.text = label_text
+	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_color_override("font_color", Color(0.42, 0.56, 0.4, 1.0))
+	actions.add_child(label)
+
 func _close_object_menu() -> void:
 	GameSession.set_pause_reason("office_object_menu", false)
 	$InteractionMenu.hide()
@@ -130,10 +143,6 @@ func _close_object_menu() -> void:
 func _select_survey() -> void:
 	_close_object_menu()
 	_open_survey()
-
-func _select_reports() -> void:
-	_close_object_menu()
-	_open_reports()
 
 func _select_archive() -> void:
 	_close_object_menu()
@@ -157,8 +166,8 @@ func _select_mercenary_management() -> void:
 ## 기획 차량의 가격·하중·속도·주행비를 표시하고 법인 구매/교체를 제공한다.
 func _open_vehicle_shop() -> void:
 	_open_workflow("office_vehicle_shop")
-	var box := _workflow_box("차량 · 인터넷 구매")
-	box.add_child(_label("법인 계좌에서 구매합니다. 활성 차량은 야외 이동 속도·하중·거리 비용에 적용됩니다."))
+	var box := _workflow_box("차량 상점")
+	box.add_child(_label("법인 계좌로 구매합니다. 선택 차량의 속도·적재량·운송비가 적용됩니다."))
 	for vehicle_id in GameSession.vehicle_definitions:
 		var definition: Dictionary = GameSession.vehicle_definitions[vehicle_id]
 		var owned := GameSession.owned_vehicle_ids.has(vehicle_id)
@@ -189,8 +198,8 @@ func _purchase_or_select_vehicle(vehicle_id: String) -> void:
 ## 최대 3명 편성과 기획 치료·일일 재기 지원을 제공한다.
 func _open_mercenary_management() -> void:
 	_open_workflow("office_mercenary_management")
-	var box := _workflow_box("용병 · 별도 전투 편성")
-	box.add_child(_label("야외 동행 인원과 별도 편성 · 최대 3명 · 출전 1명"))
+	var box := _workflow_box("용병 관리")
+	box.add_child(_label("야외 동행과 별도 편성 · 최대 3명 · 전투 출전 1명"))
 	for mercenary_id in GameSession.mercenary_roster:
 		var mercenary: Dictionary = GameSession.mercenaries[mercenary_id]
 		var definition: Dictionary = GameSession.mercenary_definitions[str(mercenary["type_id"])]
@@ -237,9 +246,9 @@ func _revive_basic_mercenary() -> void:
 func _phone() -> void:
 	_close_object_menu()
 	_open_workflow("office_phone")
-	var box := _workflow_box("직원 연락 상태")
+	var box := _workflow_box("직원 연락")
 	var state: Dictionary = GameSession.employee_states.get("staff_01", {})
-	box.add_child(_label("직원 상태: %s · 조사 보고 %d건\n조사 중에도 회사 메신저와 전화 응대가 가능합니다." % [_assignment_name(str(state.get("assignment", "사옥 대기"))), GameSession.market_reports.size()]))
+	box.add_child(_label("직원 상태: %s\n도착한 조사 보고: %d건\n출장 중에도 이 전화로 연락할 수 있습니다." % [_assignment_name(str(state.get("assignment", "사옥 대기"))), GameSession.market_reports.size()]))
 	var close := Button.new()
 	close.text = "닫기"
 	close.pressed.connect(_close_workflow)
@@ -248,7 +257,7 @@ func _phone() -> void:
 func _staff_action() -> void:
 	var result := GameSession.return_staff_to_companion("staff_01")
 	if not result.ok:
-		$InteractionMenu/Rows/Description.text = "동행 합류 불가: %s" % result.get("reason", "확인 필요")
+		$InteractionMenu/Rows/Description.text = "합류할 수 없습니다. %s" % _reason_text(str(result.get("reason", "")))
 
 func _cancel_task() -> void:
 	var active_id := ""
@@ -259,13 +268,21 @@ func _cancel_task() -> void:
 		return
 	var result := GameSession.cancel_research(active_id)
 	if result.ok:
-		$InteractionMenu/Rows/Description.text = "조사를 취소했습니다. 출장비는 환불되지 않습니다."
+		$InteractionMenu/Rows/Description.text = "출장을 취소했습니다. 비용은 반환되지 않습니다."
 	else:
-		$InteractionMenu/Rows/Description.text = "취소 실패: %s" % result.get("reason", "")
+		$InteractionMenu/Rows/Description.text = "취소할 수 없습니다. %s" % _reason_text(str(result.get("reason", "")))
 
 func _refresh_staff() -> void:
 	if active_menu_object == "secretary" and $InteractionMenu.visible:
 		call_deferred("_open_object_menu", "secretary")
+
+
+## 회의 진입 버튼은 읽지 않은 보고가 없을 때 비활성화한다.
+func _refresh_meeting_button() -> void:
+	if not is_inside_tree():
+		return
+	$Panel/Meeting.text = "회의 · 도착 보고 %d" % GameSession.market_reports.size()
+	$Panel/Meeting.disabled = GameSession.market_reports.is_empty()
 
 func _assignment_name(value: String) -> String:
 	match value:
@@ -275,7 +292,7 @@ func _assignment_name(value: String) -> String:
 
 func _open_survey() -> void:
 	_open_workflow("office_workflow")
-	var box := _workflow_box("시장 조사 지시")
+	var box := _workflow_box("시장 조사")
 	var destination := OptionButton.new()
 	survey_destination_select = destination
 	for region_id in GameSession.region_definitions:
@@ -300,17 +317,17 @@ func _open_survey() -> void:
 		survey_employee_id = str(survey_employee_select.get_item_metadata(0))
 	survey_employee_select.item_selected.connect(func(index: int): survey_employee_id = str(survey_employee_select.get_item_metadata(index)))
 	box.add_child(survey_employee_select)
-	box.add_child(_label("출장비 %s원 · 기간 %d게임일 · 법인계좌에서 출발 시 지출" % [GameSession.office_rules.get("survey_cost", 0), GameSession.office_rules.get("survey_duration_days", 0)]))
+	box.add_child(_label("출장비 %s원 · 기간 %d일 · 법인 계좌" % [GameSession.office_rules.get("survey_cost", 0), GameSession.office_rules.get("survey_duration_days", 0)]))
 	survey_companion_check = CheckBox.new()
-	survey_companion_check.text = "현재 동행 중인 직원을 조사 출장으로 전환하는 데 동의"
+	survey_companion_check.text = "동행 직원을 출장 보냅니다"
 	survey_companion_check.button_pressed = not GameSession.party_ids.has(survey_employee_id)
 	box.add_child(survey_companion_check)
 	var transfer := Button.new()
-	transfer.text = "직원 화물을 주인공에게 이전 시도"
+	transfer.text = "직원 화물 옮기기"
 	transfer.pressed.connect(_transfer_employee_cargo)
 	box.add_child(transfer)
 	survey_cargo_check = CheckBox.new()
-	survey_cargo_check.text = "직원 화물이 모두 이전/비었음을 확인"
+	survey_cargo_check.text = "직원 화물이 비었음을 확인"
 	box.add_child(survey_cargo_check)
 	survey_message = _label("직원 화물 %skg · 주인공 화물 %skg" % [_weight_kg(survey_employee_id), _weight_kg("player")])
 	box.add_child(survey_message)
@@ -331,7 +348,7 @@ func _transfer_employee_cargo() -> void:
 		if quantity > 0:
 			var result := GameSession.transfer_goods(survey_employee_id, "player", str(product_id), quantity)
 			if not result.ok:
-				survey_message.text = "화물 이전 중단: %s" % result.get("reason", "")
+				survey_message.text = "화물을 옮길 수 없습니다. %s" % _reason_text(str(result.get("reason", "")))
 				return
 	survey_message.text = "화물 이전 완료 · 직원 %skg · 주인공 %skg" % [_weight_kg(survey_employee_id), _weight_kg("player")]
 
@@ -347,21 +364,6 @@ func _confirm_survey() -> void:
 func _set_survey_destination(index: int) -> void:
 	if survey_destination_select != null and index >= 0 and index < survey_destination_select.item_count:
 		survey_region = str(survey_destination_select.get_item_metadata(index))
-
-func _open_reports() -> void:
-	_open_workflow("office_reports")
-	var box := _workflow_box("시장 조사 보고")
-	if GameSession.market_reports.is_empty():
-		box.add_child(_label("아직 도착한 보고가 없습니다."))
-	for report in GameSession.market_reports:
-		var button := Button.new()
-		button.text = _report_caption(report)
-		button.pressed.connect(_show_report.bind(report))
-		box.add_child(button)
-	var close := Button.new()
-	close.text = "닫기"
-	close.pressed.connect(_close_workflow)
-	box.add_child(close)
 
 func _show_report(report: Dictionary) -> void:
 	var text := _report_caption(report) + "\n"
@@ -391,8 +393,8 @@ func _dispose_report_dialog(dialog: AcceptDialog) -> void:
 
 func _open_meeting() -> void:
 	_open_workflow("office_meeting")
-	var box := _workflow_box("회의 · 선택식 보고 취합")
-	box.add_child(_label("회의는 도착 보고를 골라 비교하는 선택 기능입니다."))
+	var box := _workflow_box("보고 회의")
+	box.add_child(_label("함께 검토할 보고를 선택하세요."))
 	for report in GameSession.market_reports:
 		var button := Button.new()
 		button.text = "%s · %s" % [report.region_name, report.observed_on]
@@ -410,8 +412,10 @@ func _open_workflow(reason: String) -> void:
 	$Panel.hide()
 	workflow_panel = PanelContainer.new()
 	workflow_panel.name = "OfficeWorkflow"
-	workflow_panel.position = Vector2(350, 210)
-	workflow_panel.size = Vector2(900, 570)
+	workflow_panel.anchor_left = 0.18
+	workflow_panel.anchor_top = 0.18
+	workflow_panel.anchor_right = 0.82
+	workflow_panel.anchor_bottom = 0.82
 	add_child(workflow_panel)
 
 func _workflow_box(title: String) -> VBoxContainer:
@@ -442,8 +446,16 @@ func _weight_kg(person_id: String) -> String:
 	return "%.1f" % (float(GameSession.get_inventory_weight_g(person_id)) / 1000.0)
 
 func _reason_text(reason: String) -> String:
-	var messages := {"companion_confirmation_required":"동행 해제 확인 필요", "cargo_confirmation_required":"화물 이전 확인 필요", "cargo_not_transferred":"직원 화물이 남아 있음", "insufficient_funds":"법인계좌 잔액 부족", "employee_unavailable":"직원이 출장 중이거나 이용 불가", "save_failed":"저장 실패"}
-	return str(messages.get(reason, reason))
+	var messages := {
+		"companion_confirmation_required":"동행 해제가 필요합니다.", "cargo_confirmation_required":"화물 이전을 확인해주세요.",
+		"cargo_not_transferred":"직원 화물을 먼저 비워주세요.", "insufficient_funds":"법인 잔액이 부족합니다.",
+		"employee_unavailable":"직원을 지금 배치할 수 없습니다.", "save_failed":"저장하지 못했습니다.",
+		"vehicle_unavailable":"차량을 이용할 수 없습니다.", "vehicle_too_far":"차량과 너무 멀리 떨어져 있습니다.",
+		"already_owned":"이미 보유한 차량입니다.", "roster_full_or_invalid":"용병 편성 한도를 확인해주세요.",
+		"already_healthy":"치료가 필요하지 않습니다.", "already_used_today":"오늘은 이미 사용했습니다.",
+		"not_eligible":"대상을 이용할 수 없습니다.", "captivity_locked":"현재는 진행할 수 없습니다."
+	}
+	return str(messages.get(reason, "요청을 처리할 수 없습니다. 조건을 확인해주세요."))
 
 func _money(value: int) -> String:
 	var digits := str(value)
